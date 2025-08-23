@@ -25,9 +25,26 @@ def create_app():
     # Inicializar extensiones con la app
     db.init_app(app)
     jwt.init_app(app)
-    allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
-    CORS(app, origins=allowed_origins)
-    
+
+    # ---------- CORS PROFESIONAL (Netlify + localhost) ----------
+    # Puedes configurar ALLOWED_ORIGINS en Render (separadas por coma).
+    # Si no está, por defecto habilita tu Netlify y el localhost.
+    allowed_origins = os.environ.get(
+        'ALLOWED_ORIGINS',
+        'https://blitzshop.netlify.app,http://localhost:3000'
+    ).split(',')
+
+    # Limitar CORS a las rutas de API y permitir Authorization
+    CORS(
+        app,
+        resources={r"/api/*": {
+            "origins": allowed_origins,
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+        }}
+    )
+    # ------------------------------------------------------------
+
     # Registrar blueprints (rutas)
     from app.routes.auth import auth_bp
     from app.routes.products import products_bp
@@ -36,7 +53,6 @@ def create_app():
     from app.routes.orders import orders_bp
     from app.routes.payments import payments_bp
     from app.routes.users import users_bp
-    
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(products_bp, url_prefix='/api/products')
@@ -46,23 +62,14 @@ def create_app():
     app.register_blueprint(payments_bp, url_prefix='/api/payments')
     app.register_blueprint(users_bp, url_prefix='/api/users')
    
-
-    
-    # Crear tablas en la base de datos
-    with app.app_context():
-        db.create_all()
-
-    # Crear tablas en la base de datos
+    # Crear tablas en la base de datos (si no usas migraciones)
     with app.app_context():
         db.create_all()
         
-    
-    @app.route('/api/health')
-    
     @app.route('/api/health')
     def health_check():
         return {'status': 'healthy', 'message': 'BlitzShop API is running!'}
-    
+
     @app.route('/static/uploads/<filename>')
     def uploaded_file(filename):
         """Servir archivos subidos"""
