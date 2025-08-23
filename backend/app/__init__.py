@@ -39,7 +39,7 @@ def create_app():
         app,
         resources={r"/api/*": {
             "origins": allowed_origins,
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
         }}
     )
