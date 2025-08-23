@@ -31,7 +31,7 @@ def create_app():
     # Si no está, por defecto habilita tu Netlify y el localhost.
     allowed_origins = os.environ.get(
         'ALLOWED_ORIGINS',
-        'https://blitzshop.netlify.app,http://localhost:3000'
+        'https://blitzshop.netlify.app,https://blitzshop-frontend.onrender.com,http://localhost:3000'
     ).split(',')
 
     # Limitar CORS a las rutas de API y permitir Authorization
