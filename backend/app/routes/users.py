@@ -280,20 +280,19 @@ def update_notifications():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-    
+
 @users_bp.route('/setup-admin-temp', methods=['GET'])
 def setup_admin_temp():
     """Crear admin temporal - BORRAR DESPUÉS"""
-    from werkzeug.security import generate_password_hash
-    admin = User.query.filter_by(email='admin@example.com').first()
-    if not admin:
-        admin = User(
-            username='Admin',
-            email='admin@example.com',
-            password_hash='scrypt:32768:8:1$IaNWB9eqW76zIvd5$18207d273efe979409df5203b88d944209c1a42c770962d222645a2e7870cb1cccdfdd79ad59349dd2b251941df98a95e17de549901d46405c53df29dcaf3d1f',
-            is_admin=True
-        )
-        db.session.add(admin)
-        db.session.commit()
-        return jsonify({'message': 'Admin created'}), 201
-    return jsonify({'message': 'Admin already exists'}), 200
+    try:
+        admin = User.query.filter_by(email='admin@example.com').first()
+        if not admin:
+            admin = User(username='Admin', email='admin@example.com')
+            admin.password_hash = 'scrypt:32768:8:1$IaNWB9eqW76zIvd5$18207d273efe979409df5203b88d944209c1a42c770962d222645a2e7870cb1cccdfdd79ad59349dd2b251941df98a95e17de549901d46405c53df29dcaf3d1f'
+            admin.is_admin = True
+            db.session.add(admin)
+            db.session.commit()
+            return jsonify({'message': 'Admin created'}), 201
+        return jsonify({'message': 'Admin already exists'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
