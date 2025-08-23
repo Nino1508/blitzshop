@@ -287,7 +287,13 @@ def setup_admin_temp():
     try:
         admin = User.query.filter_by(email='admin@example.com').first()
         if not admin:
-            admin = User(username='Admin', email='admin@example.com')
+            admin = User(
+                username='Admin',
+                email='admin@example.com',
+                password='temp',  # Temporal, se sobrescribe abajo
+                first_name='Admin',
+                last_name='User'
+            )
             admin.password_hash = 'scrypt:32768:8:1$IaNWB9eqW76zIvd5$18207d273efe979409df5203b88d944209c1a42c770962d222645a2e7870cb1cccdfdd79ad59349dd2b251941df98a95e17de549901d46405c53df29dcaf3d1f'
             admin.is_admin = True
             db.session.add(admin)
