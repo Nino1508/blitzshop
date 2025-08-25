@@ -242,8 +242,8 @@ I'm a full-stack developer passionate about building production-ready applicatio
 
 ## 📬 Contact
 
-- **LinkedIn:** linkedin.com/in/antonino-morana
-- **Email:** amorana1508@gmail.com
+- **LinkedIn:** [linkedin.com/in/antonino-morana](https://www.linkedin.com/in/antonino-morana)
+- **Email:** [amorana1508@gmail.com](mailto:amorana1508@gmail.com)
 
 
 ---
