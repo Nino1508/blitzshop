@@ -28,7 +28,7 @@ Unlike typical portfolio projects, BlitzShop is a **production-grade application
 - ✅ **PostgreSQL database** with complex relationships
 - ✅ **Professional deployment** pipeline
 
-> 💡 **Only 3% of junior portfolios include real payment processing. This project demonstrates senior-level architecture decisions.**
+> 💡 **This project implements real payment processing and production architecture patterns typically found in commercial applications.**
 
 ## 🚀 Live Demo
 
