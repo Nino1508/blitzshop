@@ -56,6 +56,8 @@ def create_order():
 
         # 1) Obtener items de carrito
         cart_items = CartItem.query.filter_by(user_id=user_id).all()
+        print(f"CART_ITEMS: {len(cart_items)}")
+        
         if not cart_items:
             logger.info("[orders.create.error] user_id=%s empty_cart", user_id)
             return jsonify({"error": "Cart is empty"}), 400
@@ -117,7 +119,6 @@ def create_order():
         db.session.commit()
 
         # 7) Respuesta consistente
-        # si tienes order.to_dict() úsalo; si no, devolvemos un payload claro:
         payload = getattr(order, "to_dict", None)
         if callable(payload):
             body = {"message": "Order created successfully", "order": order.to_dict()}
@@ -177,7 +178,7 @@ def get_order(order_id):
 
     except Exception as e:
         dt = (perf_counter() - t0) * 1000
-        logger.exception("[orders.get.error] user_id=%s order_id=%s ms=%.2f err=%s", user_id, order_id, dt, str(e))
+        logger.exception("[orders.get.error] user_id=%s order_id=%s ms=%.2f err=%s", user_id, dt, str(e))
         return jsonify({"error": "Error fetching order", "message": str(e)}), 500
 
 
@@ -263,8 +264,7 @@ def admin_list_orders():
             return {
                 "id": o.id,
                 "user_id": o.user_id,
-                "customer": u.username if u else None,
-                "email": u.email if u else None,
+                "email": u.email if u else None,  # ← CORREGIDO: ahora email consistente
                 "total_amount": to_float(o.total_amount),
                 "status": getattr(o, "status", "pending"),
                 "created_at": getattr(o, "created_at", None).isoformat() if getattr(o, "created_at", None) else None,

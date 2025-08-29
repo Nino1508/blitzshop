@@ -10,20 +10,33 @@ class Order(db.Model):
     total_amount = db.Column(db.Numeric(10, 2), nullable=False)
     stripe_payment_intent_id = db.Column(db.String(200))
     shipping_address = db.Column(db.Text)
-    billing_address = db.Column(db.Text)  # ← NUEVO: Para Stripe
+    billing_address = db.Column(db.Text)  # Para Stripe
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
-    
+    # ⚠️ Importante: NO definimos user aquí, ya viene del backref en User.orders
+
     def __init__(self, user_id, total_amount, shipping_address=None, billing_address=None):
         self.user_id = user_id
         self.total_amount = total_amount
         self.shipping_address = shipping_address
-        self.billing_address = billing_address  # ← NUEVO
+        self.billing_address = billing_address
     
     def to_dict(self):
+        # Construye objeto customer usando el backref order.user
+        customer = None
+        if hasattr(self, 'user') and self.user:
+            display_name = getattr(self.user, 'full_name', None) or getattr(self.user, 'username', None)
+            if not display_name and getattr(self.user, 'email', None):
+                display_name = self.user.email.split('@')[0]
+            customer = {
+                'id': self.user.id,
+                'display_name': display_name,
+                'email': self.user.email
+            }
+
         return {
             'id': self.id,
             'user_id': self.user_id,
@@ -31,9 +44,10 @@ class Order(db.Model):
             'total_amount': float(self.total_amount),
             'stripe_payment_intent_id': self.stripe_payment_intent_id,
             'shipping_address': self.shipping_address,
-            'billing_address': self.billing_address,  # ← NUEVO
+            'billing_address': self.billing_address,
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None,  # ← NUEVO
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+            'customer': customer,  # ← aquí ya solucionamos lo de "N/A" en frontend
             'items': [item.to_dict() for item in self.items]
         }
     
@@ -56,7 +70,7 @@ class OrderItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     unit_price = db.Column(db.Numeric(10, 2), nullable=False)
     
-    # ← NUEVOS: Snapshot del producto al momento de compra
+    # Snapshot del producto al momento de compra
     product_name = db.Column(db.String(100), nullable=False)
     product_image_url = db.Column(db.String(255))
     
@@ -65,8 +79,8 @@ class OrderItem(db.Model):
         self.product_id = product_id
         self.quantity = quantity
         self.unit_price = unit_price
-        self.product_name = product_name  # ← NUEVO
-        self.product_image_url = product_image_url  # ← NUEVO
+        self.product_name = product_name
+        self.product_image_url = product_image_url
     
     @property
     def total_price(self):
@@ -77,8 +91,8 @@ class OrderItem(db.Model):
             'id': self.id,
             'order_id': self.order_id,
             'product_id': self.product_id,
-            'product_name': self.product_name,  # ← Ahora usa el snapshot
-            'product_image_url': self.product_image_url,  # ← NUEVO
+            'product_name': self.product_name,
+            'product_image_url': self.product_image_url,
             'quantity': self.quantity,
             'unit_price': float(self.unit_price),
             'total_price': float(self.total_price)
