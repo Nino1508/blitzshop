@@ -2,6 +2,7 @@ from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from flask_migrate import Migrate
 from datetime import timedelta
 import logging
 import os
@@ -9,6 +10,7 @@ import os
 # Inicializar extensiones
 db = SQLAlchemy()
 jwt = JWTManager()
+migrate = Migrate()
 
 def _setup_logging(app: Flask) -> None:
     """
@@ -61,6 +63,7 @@ def create_app():
     # Inicializar extensiones con la app
     db.init_app(app)
     jwt.init_app(app)
+    migrate.init_app(app, db)
 
     # ---------- CORS PROFESIONAL (Netlify + localhost) ----------
     # Puedes configurar ALLOWED_ORIGINS en Render (separadas por coma).

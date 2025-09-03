@@ -11,11 +11,32 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     first_name = db.Column(db.String(80), nullable=False)
     last_name = db.Column(db.String(80), nullable=False)
+    
+    # CAMPOS PROFESIONALES NUEVOS - CONTACTO
+    phone = db.Column(db.String(20))
+    date_of_birth = db.Column(db.Date)
+    
+    # CAMPOS PROFESIONALES NUEVOS - DIRECCIÓN ESTRUCTURADA
+    address = db.Column(db.String(200))  # Calle y número
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(100))
+    postal_code = db.Column(db.String(20))
+    country = db.Column(db.String(100), default='ES')
+    
+    # CAMPOS PROFESIONALES NUEVOS - EMPRESA (OPCIONALES)
+    company_name = db.Column(db.String(200))  # NULL si es particular
+    tax_id = db.Column(db.String(50))  # DNI/NIF para particulares, CIF para empresas
+    
+    # CAMPOS EXISTENTES - MANTENER PARA COMPATIBILIDAD
+    billing_address = db.Column(db.String(500))  # Mantener temporalmente
+    shipping_address = db.Column(db.String(500))  # Mantener temporalmente
+    
+    # CONFIGURACIÓN Y ESTADO
     is_admin = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
-    email_notifications = db.Column(db.Boolean, default=True)  # NUEVO CAMPO
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))  # CORREGIDO
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))  # CORREGIDO
+    email_notifications = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     # Relationships
     orders = db.relationship('Order', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -41,6 +62,34 @@ class User(db.Model):
         """Get full name"""
         return f"{self.first_name} {self.last_name}"
     
+    @property
+    def is_company(self):
+        """Check if user is purchasing as company"""
+        return bool(self.company_name)
+    
+    def get_formatted_address(self):
+        """Get formatted address for display"""
+        if not self.address:
+            return None
+        
+        parts = [self.address]
+        if self.city:
+            parts.append(self.city)
+        if self.state:
+            parts.append(self.state)
+        if self.postal_code:
+            parts.append(self.postal_code)
+        if self.country:
+            parts.append(self.country)
+            
+        return ', '.join(filter(None, parts))
+    
+    def get_billing_name(self):
+        """Get name for billing (company name if exists, otherwise full name)"""
+        if self.company_name:
+            return self.company_name
+        return self.get_full_name()
+    
     def to_dict(self):
         """Convert user to dictionary (without password)"""
         return {
@@ -50,11 +99,55 @@ class User(db.Model):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'full_name': self.get_full_name(),
+            
+            # Campos profesionales nuevos
+            'phone': self.phone,
+            'date_of_birth': self.date_of_birth.isoformat() if self.date_of_birth else None,
+            'address': self.address,
+            'city': self.city,
+            'state': self.state,
+            'postal_code': self.postal_code,
+            'country': self.country,
+            'formatted_address': self.get_formatted_address(),
+            
+            # Datos empresa
+            'company_name': self.company_name,
+            'tax_id': self.tax_id,
+            'is_company': self.is_company,
+            'billing_name': self.get_billing_name(),
+            
+            # Campos legacy (mantener por compatibilidad)
+            'billing_address': self.billing_address,
+            'shipping_address': self.shipping_address,
+            
+            # Configuración
             'is_admin': self.is_admin,
             'is_active': self.is_active,
-            'email_notifications': self.email_notifications, 
+            'email_notifications': self.email_notifications,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
+    
+    def update_from_dict(self, data):
+        """Update user fields from dictionary (for profile updates)"""
+        updateable_fields = [
+            'first_name', 'last_name', 'phone', 
+            'address', 'city', 'state', 'postal_code', 'country',
+            'company_name', 'tax_id', 'email_notifications'
+        ]
+        
+        for field in updateable_fields:
+            if field in data:
+                setattr(self, field, data[field])
+        
+        # Handle date_of_birth separately (needs parsing)
+        if 'date_of_birth' in data and data['date_of_birth']:
+            from datetime import datetime
+            try:
+                self.date_of_birth = datetime.fromisoformat(data['date_of_birth']).date()
+            except:
+                pass  # Ignore invalid dates
+        
+        self.updated_at = datetime.now(timezone.utc)
     
     def __repr__(self):
         return f'<User {self.email}>'
