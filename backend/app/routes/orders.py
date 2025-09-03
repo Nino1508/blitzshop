@@ -53,6 +53,7 @@ def create_order():
     logger.info("[orders.create.start] user_id=%s", user_id)
     try:
         data = request.get_json(silent=True) or {}
+        print(f"RAW DATA RECEIVED: {data}")
 
         # 1) Obtener items de carrito
         cart_items = CartItem.query.filter_by(user_id=user_id).all()

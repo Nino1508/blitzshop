@@ -1,4 +1,4 @@
-# cart.py – BlitzShop (mejoras + contrato legacy del carrito)
+# cart.py – BlitzShop (versión corregida y optimizada)
 import logging
 from time import perf_counter
 from decimal import Decimal, InvalidOperation
@@ -52,8 +52,11 @@ def _serialize_cart(user_id: int):
         line_total = unit_price * quantity
 
         items.append({
+            "id": ci.id,  # CRÍTICO: ID del cart_item para Remove
             "product_id": product.id,
             "name": getattr(product, "name", None),
+            "description": getattr(product, "description", None),  # Añadido
+            "image_url": getattr(product, "image_url", None),  # Añadido
             "unit_price": unit_price,
             "quantity": quantity,
             "line_total": round(line_total, 2),
@@ -68,16 +71,16 @@ def _legacy_cart(resp):
     legacy_items = []
     for i in resp.get("items", []):
         legacy_items.append({
-            "id": None,
+            "id": i.get("id"),  # CAMBIADO: ahora usa el ID real
             "product_id": i["product_id"],
             "quantity": i["quantity"],
             "unit_price": i["unit_price"],
             "total_price": i["line_total"],
             "product": {
                 "name": i.get("name"),
-                "description": None,
-                "image_url": None,
-                "stock": None
+                "description": i.get("description"),  # CAMBIADO: ahora tiene valor real
+                "image_url": i.get("image_url"),  # CAMBIADO: ahora tiene valor real
+                "stock": None  # Este puede quedar null o agregar product.stock si lo necesitas
             }
         })
     return {
@@ -87,7 +90,7 @@ def _legacy_cart(resp):
     }
 
 # -----------------------------
-# Endpoints
+# Endpoints (sin cambios)
 # -----------------------------
 
 @cart_bp.route("/", methods=["GET"])

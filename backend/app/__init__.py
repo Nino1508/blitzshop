@@ -91,6 +91,8 @@ def create_app():
     from app.routes.payments import payments_bp
     from app.routes.users import users_bp
     from app.routes.analytics import analytics_bp
+    from app.routes.invoices import invoices_bp
+    from app.routes.coupons import coupons_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(products_bp, url_prefix='/api/products')
@@ -100,6 +102,8 @@ def create_app():
     app.register_blueprint(payments_bp, url_prefix='/api/payments')
     app.register_blueprint(users_bp, url_prefix='/api/users')
     app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
+    app.register_blueprint(invoices_bp, url_prefix='')
+    app.register_blueprint(coupons_bp, url_prefix='/api/coupons')
 
     # Crear tablas en la base de datos (si no usas migraciones)
     with app.app_context():

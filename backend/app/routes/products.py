@@ -55,6 +55,7 @@ def serialize_product(p: Product):
         "name": p.name,
         "description": p.description,
         "price": to_float(p.price),
+        "discount_percentage": p.discount_percentage,
         "stock": p.stock,
         "category": p.category,
         "image_url": p.image_url,

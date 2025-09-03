@@ -8,6 +8,9 @@ class Order(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     status = db.Column(db.String(50), default='pending')  # pending, paid, shipped, delivered, cancelled
     total_amount = db.Column(db.Numeric(10, 2), nullable=False)
+    coupon_code = db.Column(db.String(50))
+    discount_amount = db.Column(db.Numeric(10, 2), default=0)
+    final_amount = db.Column(db.Numeric(10, 2))
     stripe_payment_intent_id = db.Column(db.String(200))
     shipping_address = db.Column(db.Text)
     billing_address = db.Column(db.Text)  # Para Stripe
@@ -42,6 +45,9 @@ class Order(db.Model):
             'user_id': self.user_id,
             'status': self.status,
             'total_amount': float(self.total_amount),
+            'coupon_code': self.coupon_code,
+            'discount_amount': float(self.discount_amount) if self.discount_amount else 0,
+            'final_amount': float(self.final_amount) if self.final_amount else float(self.total_amount),
             'stripe_payment_intent_id': self.stripe_payment_intent_id,
             'shipping_address': self.shipping_address,
             'billing_address': self.billing_address,

@@ -1,10 +1,10 @@
-# app/routes/admin.py — BlitzShop (compat admin + mejoras)
+# app/routes/admin.py — BlitzShop (con soporte para descuentos)
 import os
 import uuid
 import logging
 from time import perf_counter
 from decimal import Decimal, InvalidOperation
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -13,19 +13,19 @@ from werkzeug.utils import secure_filename
 from app import db
 from app.models.user import User
 from app.models.product import Product
-from app.models.order import Order, OrderItem  # items para /orders
+from app.models.order import Order, OrderItem
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 logger = logging.getLogger(__name__)
 
-# --- Uploads (igual que tu versión original) ---
+# --- Uploads ---
 UPLOAD_FOLDER = "static/uploads"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# --- Helpers estándar ---
+# --- Helpers ---
 def to_float(v):
     try:
         if v is None:
@@ -83,9 +83,10 @@ def get_all_products():
             "name": p.name,
             "description": p.description,
             "price": to_float(p.price),
+            "discount_percentage": p.discount_percentage,
             "category": p.category,
             "image_url": p.image_url,
-            "stock_quantity": p.stock,   # clave legacy
+            "stock_quantity": p.stock,
             "is_active": p.is_active,
             "created_at": p.created_at.isoformat() if p.created_at else None,
         } for p in products.items]
@@ -115,7 +116,7 @@ def get_all_products():
 @admin_bp.route("/products", methods=["POST"])
 @admin_required
 def create_product():
-    """Crear producto (form-data o JSON) — contrato legacy en respuesta"""
+    """Crear producto (form-data o JSON)"""
     t0 = perf_counter()
     logger.info("[admin.products.create.start]")
     try:
@@ -126,6 +127,7 @@ def create_product():
             price = request.form.get("price")
             category = request.form.get("category")
             stock_quantity = request.form.get("stock_quantity", 0)
+            discount_percentage = request.form.get("discount_percentage", 0)
             is_active = request.form.get("is_active", "true").lower() == "true"
             image_file = request.files.get("image")
         else:
@@ -135,6 +137,7 @@ def create_product():
             price = data.get("price")
             category = data.get("category")
             stock_quantity = data.get("stock_quantity", 0)
+            discount_percentage = data.get("discount_percentage", 0)
             is_active = bool(data.get("is_active", True))
             image_file = None
 
@@ -144,11 +147,15 @@ def create_product():
         try:
             price = float(price)
             stock_quantity = int(stock_quantity)
+            discount_percentage = int(discount_percentage)
         except (ValueError, TypeError):
-            return error_response(400, "Invalid price or stock quantity")
+            return error_response(400, "Invalid price, stock quantity or discount percentage")
 
         if price < 0 or stock_quantity < 0:
             return error_response(400, "Price and stock cannot be negative")
+            
+        if discount_percentage < 0 or discount_percentage > 99:
+            discount_percentage = 0
 
         if Product.query.filter_by(name=name).first():
             return error_response(400, "Product with this name already exists")
@@ -162,7 +169,6 @@ def create_product():
             unique = f"{uuid.uuid4()}_{filename}"
             filepath = os.path.join(UPLOAD_FOLDER, unique)
             image_file.save(filepath)
-            # Absoluto como tu versión original
             image_url = f"http://localhost:5000/static/uploads/{unique}"
 
         product = Product(
@@ -173,6 +179,7 @@ def create_product():
             category=category,
             image_url=image_url,
             is_active=is_active,
+            discount_percentage=discount_percentage,
         )
         db.session.add(product)
         db.session.commit()
@@ -184,6 +191,7 @@ def create_product():
                 "name": product.name,
                 "description": product.description,
                 "price": to_float(product.price),
+                "discount_percentage": product.discount_percentage,
                 "category": product.category,
                 "image_url": product.image_url,
                 "stock_quantity": product.stock,
@@ -204,7 +212,7 @@ def create_product():
 @admin_bp.route("/products/<int:product_id>", methods=["PUT"])
 @admin_required
 def update_product(product_id):
-    """Actualizar producto (form-data o JSON) — contrato legacy"""
+    """Actualizar producto (form-data o JSON)"""
     t0 = perf_counter()
     logger.info("[admin.products.update.start] id=%s", product_id)
     try:
@@ -221,6 +229,7 @@ def update_product(product_id):
             price = request.form.get("price")
             category = request.form.get("category")
             stock_quantity = request.form.get("stock_quantity")
+            discount_percentage = request.form.get("discount_percentage")
             is_active_raw = request.form.get("is_active")
             image_file = request.files.get("image")
             is_active = (str(is_active_raw).lower() == "true") if is_active_raw is not None else None
@@ -231,6 +240,7 @@ def update_product(product_id):
             price = data.get("price")
             category = data.get("category")
             stock_quantity = data.get("stock_quantity")
+            discount_percentage = data.get("discount_percentage")
             is_active = data.get("is_active")
             image_file = None
 
@@ -268,13 +278,21 @@ def update_product(product_id):
             except (ValueError, TypeError):
                 return error_response(400, "Invalid stock quantity format")
 
+        if discount_percentage is not None:
+            try:
+                discount_val = int(discount_percentage)
+                if discount_val < 0 or discount_val > 99:
+                    return error_response(400, "Discount must be between 0 and 99")
+                product.discount_percentage = discount_val
+            except (ValueError, TypeError):
+                return error_response(400, "Invalid discount percentage format")
+
         if is_active is not None:
             product.is_active = bool(is_active)
 
         if image_file and image_file.filename:
             if not allowed_file(image_file.filename):
                 return error_response(400, "Invalid image format")
-            # borrar anterior si era local
             if product.image_url and "localhost:5000" in product.image_url:
                 old_filename = product.image_url.split("/")[-1]
                 old_path = os.path.join(UPLOAD_FOLDER, old_filename)
@@ -299,6 +317,7 @@ def update_product(product_id):
                 "name": product.name,
                 "description": product.description,
                 "price": to_float(product.price),
+                "discount_percentage": product.discount_percentage,
                 "category": product.category,
                 "image_url": product.image_url,
                 "stock_quantity": product.stock,
@@ -319,7 +338,7 @@ def update_product(product_id):
 @admin_bp.route("/products/<int:product_id>", methods=["DELETE"])
 @admin_required
 def delete_product(product_id):
-    """Eliminar producto permanentemente (legacy comportamiento)"""
+    """Eliminar producto permanentemente"""
     t0 = perf_counter()
     logger.info("[admin.products.delete.start] id=%s", product_id)
     try:
@@ -329,7 +348,6 @@ def delete_product(product_id):
             logger.info("[admin.products.delete.ok] id=%s status=404 ms=%.2f", product_id, dt)
             return error_response(404, "Product not found")
 
-        # eliminar imagen si es local
         if product.image_url and "localhost:5000" in product.image_url:
             old_filename = product.image_url.split("/")[-1]
             old_path = os.path.join(UPLOAD_FOLDER, old_filename)
@@ -406,7 +424,7 @@ def get_categories():
 @admin_bp.route("/orders", methods=["GET"])
 @admin_required
 def get_all_orders():
-    """Listado admin de órdenes — contrato legacy: orders + total/pages/current_page"""
+    """Listado admin de órdenes"""
     t0 = perf_counter()
     logger.info("[admin.orders.list.start]")
     try:
@@ -414,7 +432,6 @@ def get_all_orders():
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 20, type=int)
 
-        # join con usuario para extraer su email si lo necesitas
         query = Order.query
         if status and status != "all":
             query = query.filter(Order.status == status)
@@ -463,7 +480,7 @@ def get_all_orders():
 @admin_bp.route("/orders/<int:order_id>/status", methods=["PUT"])
 @admin_required
 def update_order_status(order_id):
-    """Actualizar estado de orden — contrato legacy simple"""
+    """Actualizar estado de orden"""
     t0 = perf_counter()
     logger.info("[admin.orders.status.start] order_id=%s", order_id)
     try:
@@ -480,7 +497,7 @@ def update_order_status(order_id):
             return error_response(400, "Invalid status")
 
         order.status = new_status
-        order.updated_at = datetime.utcnow()
+        order.updated_at = datetime.now(timezone.utc)
         db.session.commit()
 
         resp = {"message": "Order status updated", "order_id": order_id, "new_status": new_status}
