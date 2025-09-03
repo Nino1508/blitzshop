@@ -89,14 +89,30 @@ def get_invoice(invoice_id):
         logger.error(f"Error getting invoice {invoice_id}: {str(e)}")
         return jsonify({'error': 'Failed to retrieve invoice'}), 500
 
-# OPTIONS handler para CORS en descarga de admin
+# OPTIONS handler para CORS en descarga de admin - CORREGIDO
 @invoices_bp.route('/api/admin/invoices/<int:invoice_id>/download', methods=['OPTIONS'])
 def download_invoice_admin_options(invoice_id):
-    response = make_response('', 200)
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
-    return response
+    # Obtener el origen desde el request header
+    origin = request.headers.get('Origin')
+    
+    # Lista de orígenes permitidos
+    allowed_origins = [
+        'https://blitzshop.netlify.app',
+        'https://blitzshop-frontend.onrender.com', 
+        'http://localhost:3000'
+    ]
+    
+    # Si el origen está permitido, responder con los headers CORS apropiados
+    if origin in allowed_origins:
+        response = make_response('', 200)
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response
+    else:
+        # Si el origen no está permitido, retornar 403
+        return make_response('Origin not allowed', 403)
 
 @invoices_bp.route('/api/invoices/<int:invoice_id>/download', methods=['GET'])
 @jwt_required()
@@ -158,6 +174,17 @@ def download_invoice_admin(invoice_id):
         response = make_response(pdf_buffer.getvalue())
         response.headers['Content-Type'] = 'application/pdf'
         response.headers['Content-Disposition'] = f'attachment; filename=invoice_{invoice.invoice_number}.pdf'
+        # Agregar headers CORS para el GET también
+        origin = request.headers.get('Origin')
+        allowed_origins = [
+            'https://blitzshop.netlify.app',
+            'https://blitzshop-frontend.onrender.com',
+            'http://localhost:3000'
+        ]
+        if origin in allowed_origins:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+        
         return response
         
     except Exception as e:
@@ -492,15 +519,15 @@ def generate_invoice_pdf(invoice):
     story.append(company_billing_table)
     story.append(Spacer(1, 30))
     
-    # Order items from the associated order - CORREGIDO
+    # Order items from the associated order
     if invoice.order and invoice.order.items:
         items_data = [['Description', 'Qty', 'Price', 'Total']]
         for item in invoice.order.items:
             items_data.append([
                 item.product.name if item.product else 'Product',
                 str(item.quantity),
-                f"{invoice.currency} {item.unit_price:.2f}",  # CORREGIDO
-                f"{invoice.currency} {(item.quantity * item.unit_price):.2f}"  # CORREGIDO
+                f"{invoice.currency} {item.unit_price:.2f}",
+                f"{invoice.currency} {(item.quantity * item.unit_price):.2f}"
             ])
         
         items_table = Table(items_data, colWidths=[250, 50, 100, 100])
