@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, send_file, make_response
+from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models.invoice import Invoice, InvoiceSettings
@@ -9,10 +9,9 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import logging
 from time import perf_counter
-import os
 from io import BytesIO
 
-# Para generación de PDF (instalar: pip install reportlab)
+# PDF Support - todos los imports juntos arriba
 try:
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
@@ -89,30 +88,6 @@ def get_invoice(invoice_id):
         logger.error(f"Error getting invoice {invoice_id}: {str(e)}")
         return jsonify({'error': 'Failed to retrieve invoice'}), 500
 
-# OPTIONS handler para CORS en descarga de admin - CORREGIDO
-@invoices_bp.route('/api/admin/invoices/<int:invoice_id>/download', methods=['OPTIONS'])
-def download_invoice_admin_options(invoice_id):
-    # Obtener el origen desde el request header
-    origin = request.headers.get('Origin')
-    
-    # Lista de orígenes permitidos
-    allowed_origins = [
-        'https://blitzshop.netlify.app',
-        'https://blitzshop-frontend.onrender.com', 
-        'http://localhost:3000'
-    ]
-    
-    # Si el origen está permitido, responder con los headers CORS apropiados
-    if origin in allowed_origins:
-        response = make_response('', 200)
-        response.headers['Access-Control-Allow-Origin'] = origin
-        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-        return response
-    else:
-        # Si el origen no está permitido, retornar 403
-        return make_response('Origin not allowed', 403)
 
 @invoices_bp.route('/api/invoices/<int:invoice_id>/download', methods=['GET'])
 @jwt_required()
@@ -148,49 +123,6 @@ def download_invoice(invoice_id):
     except Exception as e:
         logger.error(f"Error downloading invoice {invoice_id}: {str(e)}")
         return jsonify({'error': 'Failed to generate PDF'}), 500
-
-# Duplicate route for admin download (mantiene compatibilidad con frontend)
-@invoices_bp.route('/api/admin/invoices/<int:invoice_id>/download', methods=['GET'])
-@jwt_required()
-@admin_required
-def download_invoice_admin(invoice_id):
-    """Admin download invoice as PDF"""
-    if not PDF_SUPPORT:
-        return jsonify({'error': 'PDF generation not available'}), 503
-    
-    start_time = perf_counter()
-    try:
-        invoice = Invoice.query.get(invoice_id)
-        
-        if not invoice:
-            return jsonify({'error': 'Invoice not found'}), 404
-        
-        # Generate PDF
-        pdf_buffer = generate_invoice_pdf(invoice)
-        
-        elapsed = perf_counter() - start_time
-        logger.info(f"Admin generated PDF for invoice {invoice_id} in {elapsed:.3f}s")
-        
-        response = make_response(pdf_buffer.getvalue())
-        response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = f'attachment; filename=invoice_{invoice.invoice_number}.pdf'
-        # Agregar headers CORS para el GET también
-        origin = request.headers.get('Origin')
-        allowed_origins = [
-            'https://blitzshop.netlify.app',
-            'https://blitzshop-frontend.onrender.com',
-            'http://localhost:3000'
-        ]
-        if origin in allowed_origins:
-            response.headers['Access-Control-Allow-Origin'] = origin
-            response.headers['Access-Control-Allow-Credentials'] = 'true'
-        
-        return response
-        
-    except Exception as e:
-        logger.error(f"Error downloading invoice {invoice_id}: {str(e)}")
-        return jsonify({'error': 'Failed to generate PDF'}), 500
-
 
 # ==================== ADMIN ROUTES ====================
 
@@ -254,7 +186,7 @@ def admin_get_all_invoices():
 @jwt_required()
 @admin_required
 def admin_create_invoice(order_id):
-    """Admin: Create invoice from order"""
+    """Admin: Create invoice from order with user profile data"""
     start_time = perf_counter()
     try:
         # Get order
@@ -273,6 +205,9 @@ def admin_create_invoice(order_id):
         # Get request data
         data = request.get_json() or {}
         
+        # Get user with professional fields
+        user = order.user
+        
         # Calculate totals
         totals = Invoice.calculate_totals(
             order,
@@ -281,7 +216,17 @@ def admin_create_invoice(order_id):
             discount_amount=data.get('discount_amount', 0)
         )
         
-        # Create invoice
+        # Determine billing name - from form or user profile
+        billing_name = data.get('billing_name')
+        if not billing_name:
+            if user.company_name:
+                billing_name = user.company_name
+            elif user.first_name and user.last_name:
+                billing_name = f"{user.first_name} {user.last_name}"
+            else:
+                billing_name = user.username
+        
+        # Create invoice with user profile data or form data
         invoice = Invoice(
             invoice_number=Invoice.generate_invoice_number(settings.invoice_prefix),
             order_id=order_id,
@@ -296,16 +241,20 @@ def admin_create_invoice(order_id):
             total_amount=totals['total_amount'],
             status='pending',
             payment_method='stripe',
-            # Billing info from user
-            billing_name=order.user.username,
-            billing_email=order.user.email,
-            billing_phone=data.get('billing_phone', ''),
-            billing_address=data.get('billing_address', order.shipping_address or ''),
-            billing_city=data.get('billing_city', ''),
-            billing_state=data.get('billing_state', ''),
-            billing_postal_code=data.get('billing_postal_code', ''),
-            billing_country=data.get('billing_country', settings.company_country),
-            # Company info from settings
+            
+            # Billing info - prefer form data, fallback to user profile
+            billing_name=billing_name,
+            billing_email=user.email,
+            billing_phone=data.get('billing_phone', user.phone or ''),
+            billing_address=data.get('billing_address', user.address or ''),
+            billing_city=data.get('billing_city', user.city or ''),
+            billing_state=data.get('billing_state', user.state or ''),
+            billing_postal_code=data.get('billing_postal_code', user.postal_code or ''),
+            billing_country=data.get('billing_country', user.country or settings.company_country or 'ES'),
+            # Note: if you have billing_tax_id field in Invoice model, uncomment:
+            # billing_tax_id=data.get('billing_tax_id', user.tax_id or ''),
+            
+            # Company info from settings (your company)
             company_name=settings.company_name,
             company_tax_id=settings.company_tax_id,
             company_address=settings.company_address,
@@ -314,7 +263,8 @@ def admin_create_invoice(order_id):
             company_country=settings.company_country,
             company_email=settings.company_email,
             company_phone=settings.company_phone,
-            # Additional
+            
+            # Additional fields
             currency=settings.default_currency,
             notes=data.get('notes', ''),
             terms_conditions=settings.terms_conditions
@@ -406,6 +356,70 @@ def admin_delete_invoice(invoice_id):
         return jsonify({'error': 'Failed to delete invoice'}), 500
 
 
+@invoices_bp.route('/api/admin/invoices/<int:invoice_id>/download', methods=['OPTIONS'])
+def download_invoice_admin_options(invoice_id):
+    """Handle CORS preflight for admin invoice download"""
+    origin = request.headers.get('Origin')
+    
+    allowed_origins = [
+        'https://blitzshop.netlify.app',
+        'https://blitzshop-frontend.onrender.com', 
+        'http://localhost:3000'
+    ]
+    
+    if origin in allowed_origins:
+        response = make_response('', 200)
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Methods'] = 'GET, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response
+    else:
+        return make_response('Origin not allowed', 403)
+
+
+@invoices_bp.route('/api/admin/invoices/<int:invoice_id>/download', methods=['GET'])
+@jwt_required()
+@admin_required
+def download_invoice_admin(invoice_id):
+    """Admin download invoice as PDF"""
+    if not PDF_SUPPORT:
+        return jsonify({'error': 'PDF generation not available'}), 503
+    
+    start_time = perf_counter()
+    try:
+        invoice = Invoice.query.get(invoice_id)
+        
+        if not invoice:
+            return jsonify({'error': 'Invoice not found'}), 404
+        
+        # Generate PDF
+        pdf_buffer = generate_invoice_pdf(invoice)
+        
+        elapsed = perf_counter() - start_time
+        logger.info(f"Admin generated PDF for invoice {invoice_id} in {elapsed:.3f}s")
+        
+        response = make_response(pdf_buffer.getvalue())
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename=invoice_{invoice.invoice_number}.pdf'
+        
+        # Add CORS headers for GET request
+        origin = request.headers.get('Origin')
+        allowed_origins = [
+            'https://blitzshop.netlify.app',
+            'https://blitzshop-frontend.onrender.com',
+            'http://localhost:3000'
+        ]
+        if origin in allowed_origins:
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Error downloading invoice {invoice_id}: {str(e)}")
+        return jsonify({'error': 'Failed to generate PDF'}), 500
+
 # ==================== SETTINGS ROUTES ====================
 
 @invoices_bp.route('/api/admin/invoice-settings', methods=['GET'])
@@ -435,11 +449,14 @@ def update_invoice_settings():
                       'company_city', 'company_postal_code', 'company_country',
                       'company_email', 'company_phone', 'company_website',
                       'invoice_prefix', 'default_currency', 'payment_terms_days',
-                      'terms_conditions', 'footer_text', 'bank_name', 
-                      'bank_account', 'bank_iban', 'bank_swift', 'logo_url']:
+                      'default_tax_rate', 'terms_conditions', 'footer_text', 
+                      'bank_name', 'bank_account', 'bank_iban', 'bank_swift', 
+                      'logo_url']:
             if field in data:
                 if field == 'default_tax_rate':
                     setattr(settings, field, Decimal(str(data[field])))
+                elif field == 'payment_terms_days':
+                    setattr(settings, field, int(data[field]))
                 else:
                     setattr(settings, field, data[field])
         
@@ -510,6 +527,13 @@ def generate_invoice_pdf(invoice):
         [invoice.company_email or '', invoice.billing_email],
     ]
     
+    # Add tax ID if company invoice
+    if hasattr(invoice, 'billing_tax_id') and invoice.billing_tax_id:
+        company_billing_data.append([
+            f"Tax ID: {invoice.company_tax_id or ''}", 
+            f"Tax ID: {invoice.billing_tax_id}"
+        ])
+    
     company_billing_table = Table(company_billing_data, colWidths=[250, 250])
     company_billing_table.setStyle(TableStyle([
         ('FONT', (0, 0), (-1, -1), 'Helvetica', 10),
@@ -519,7 +543,7 @@ def generate_invoice_pdf(invoice):
     story.append(company_billing_table)
     story.append(Spacer(1, 30))
     
-    # Order items from the associated order
+    # Order items
     if invoice.order and invoice.order.items:
         items_data = [['Description', 'Qty', 'Price', 'Total']]
         for item in invoice.order.items:

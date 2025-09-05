@@ -224,16 +224,106 @@ def list_my_orders():
         return jsonify({"error": "Error listing orders", "message": str(e)}), 500
 
 
+@orders_bp.route('/admin/orders', methods=['GET'])
+@admin_required
+def admin_get_all_orders():
+    """Admin endpoint compatible with ManageInvoices - returns full user data"""
+    t0 = perf_counter()
+    page = max(1, int(request.args.get("page", 1)))
+    per_page = min(100, max(1, int(request.args.get("per_page", 20))))
+    status = request.args.get("status")
+    
+    logger.info("[orders.admin_get_all.start] page=%s per_page=%s status=%s", page, per_page, status)
+    
+    try:
+        query = Order.query
+        
+        if status:
+            query = query.filter(Order.status == status)
+        
+        query = query.order_by(desc(Order.created_at))
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        orders_list = []
+        for order in pagination.items:
+            order_dict = {
+                "id": order.id,
+                "user_id": order.user_id,
+                "total_amount": to_float(order.total_amount),
+                "status": getattr(order, "status", "pending"),
+                "created_at": getattr(order, "created_at", None).isoformat() if getattr(order, "created_at", None) else None,
+                "shipping_address": order.shipping_address,
+                "billing_address": order.billing_address,
+            }
+            
+            # IMPORTANTE: Incluir TODOS los campos del usuario para las facturas
+            if order.user:
+                order_dict["user"] = {
+                    "id": order.user.id,
+                    "username": order.user.username,
+                    "email": order.user.email,
+                    "first_name": order.user.first_name or "",
+                    "last_name": order.user.last_name or "",
+                    "phone": order.user.phone or "",
+                    "address": order.user.address or "",
+                    "city": order.user.city or "",
+                    "state": order.user.state or "",
+                    "postal_code": order.user.postal_code or "",
+                    "country": order.user.country or "ES",
+                    "company_name": order.user.company_name or "",
+                    "tax_id": order.user.tax_id or "",
+                    "billing_address": order.user.billing_address or order.user.address or "",
+                    "shipping_address": order.user.shipping_address or order.user.address or ""
+                }
+            else:
+                # Si no hay usuario (no debería pasar), enviar datos vacíos
+                order_dict["user"] = {
+                    "username": "Guest",
+                    "email": "",
+                    "first_name": "",
+                    "last_name": "",
+                    "phone": "",
+                    "address": "",
+                    "city": "",
+                    "state": "",
+                    "postal_code": "",
+                    "country": "ES",
+                    "company_name": "",
+                    "tax_id": "",
+                    "billing_address": "",
+                    "shipping_address": ""
+                }
+            
+            orders_list.append(order_dict)
+        
+        resp = {
+            "orders": orders_list,
+            "total": pagination.total,
+            "pages": pagination.pages,
+            "current_page": page
+        }
+        
+        dt = (perf_counter() - t0) * 1000
+        logger.info("[orders.admin_get_all.ok] status=200 count=%s ms=%.2f", len(orders_list), dt)
+        return jsonify(resp), 200
+        
+    except Exception as e:
+        dt = (perf_counter() - t0) * 1000
+        logger.exception("[orders.admin_get_all.error] ms=%.2f err=%s", dt, str(e))
+        return jsonify({"error": "Error fetching orders", "message": str(e)}), 500
+
+
+# MANTENER el endpoint antiguo por compatibilidad
 @orders_bp.route('/admin/all', methods=['GET'])
 @admin_required
 def admin_list_orders():
-    """Listado admin de todas las órdenes (paginado + filtros básicos)."""
+    """Listado admin de todas las órdenes (endpoint antiguo - mantener por compatibilidad)"""
     t0 = perf_counter()
     page = max(1, int(request.args.get("page", 1)))
     limit = min(100, max(1, int(request.args.get("limit", 20))))
-    status = request.args.get("status")  # ej: paid, pending, cancelled
-    start_date = request.args.get("start_date")  # YYYY-MM-DD
-    end_date = request.args.get("end_date")      # YYYY-MM-DD
+    status = request.args.get("status")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
     logger.info("[orders.admin_list.start] page=%s limit=%s status=%s range=%s..%s",
                 page, limit, status, start_date, end_date)
     try:
@@ -242,7 +332,6 @@ def admin_list_orders():
         if status:
             qs = qs.filter(Order.status == status)
 
-        # Filtro por rango de fechas en created_at (opcional)
         if start_date:
             try:
                 sd = datetime.strptime(start_date, "%Y-%m-%d").date()
@@ -265,7 +354,7 @@ def admin_list_orders():
             return {
                 "id": o.id,
                 "user_id": o.user_id,
-                "email": u.email if u else None,  # ← CORREGIDO: ahora email consistente
+                "email": u.email if u else None,
                 "total_amount": to_float(o.total_amount),
                 "status": getattr(o, "status", "pending"),
                 "created_at": getattr(o, "created_at", None).isoformat() if getattr(o, "created_at", None) else None,
