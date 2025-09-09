@@ -257,3 +257,4 @@ This is not a tutorial project. Every architectural decision was made with scala
 **The backend runs on paid infrastructure (Render Starter) to ensure 24/7 availability for your review.**
 
 </div>
+CI smoke test - 09/09/2025 19:28:41,03
