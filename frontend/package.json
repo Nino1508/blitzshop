@@ -22,6 +22,10 @@
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
   },
+  "overrides": {
+    "cssnano": "^5.1.15",
+    "postcss-calc": "^9.0.1"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
