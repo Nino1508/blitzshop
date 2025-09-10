@@ -1,0 +1,45 @@
+name: CI – Auto Deploy BlitzShop
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - 'netlify.toml'
+      - '.github/workflows/deploy.yml'
+      - 'README.md'
+  workflow_dispatch:
+
+jobs:
+  trigger-netlify:
+    if: ${{ secrets.NETLIFY_BUILD_HOOK != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Netlify Build Hook
+        run: |
+          echo "Calling Netlify Hook..."
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$NETLIFY_BUILD_HOOK")
+          echo "Netlify response: $code"
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "❌ Netlify hook failed"
+            exit 1
+          fi
+        env:
+          NETLIFY_BUILD_HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+
+  trigger-render:
+    if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: |
+          echo "Calling Render Hook..."
+          code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK")
+          echo "Render response: $code"
+          if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+            echo "❌ Render hook failed"
+            exit 1
+          fi
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
