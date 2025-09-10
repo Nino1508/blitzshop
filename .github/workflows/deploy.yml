@@ -13,10 +13,10 @@ on:
 
 jobs:
   trigger-netlify:
-    if: ${{ secrets.NETLIFY_BUILD_HOOK != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Netlify Build Hook
+        if: ${{ env.NETLIFY_BUILD_HOOK != '' }}
         run: |
           echo "Calling Netlify Hook..."
           code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$NETLIFY_BUILD_HOOK")
@@ -29,10 +29,10 @@ jobs:
           NETLIFY_BUILD_HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
 
   trigger-render:
-    if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render Deploy Hook
+        if: ${{ env.RENDER_DEPLOY_HOOK != '' }}
         run: |
           echo "Calling Render Hook..."
           code=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$RENDER_DEPLOY_HOOK")
