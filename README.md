@@ -258,3 +258,4 @@ This is not a tutorial project. Every architectural decision was made with scala
 
 </div>
 CI smoke test - 09/09/2025 19:28:41,03
+" " 
