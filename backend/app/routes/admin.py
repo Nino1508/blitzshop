@@ -343,7 +343,9 @@ def delete_product(product_id):
     logger.info("[admin.products.delete.start] id=%s", product_id)
     try:
         # Bloquear usuario demo
-        if get_jwt_identity() == 'demo@blitzshop.com':
+        current_user_id = get_jwt_identity()
+        user = User.query.get(int(current_user_id))
+        if user and user.email == 'demo@blitzshop.com':
             return jsonify({"error": "Demo account cannot delete products"}), 403
         product = Product.query.get(product_id)
         if not product:
