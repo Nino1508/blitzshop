@@ -342,6 +342,9 @@ def delete_product(product_id):
     t0 = perf_counter()
     logger.info("[admin.products.delete.start] id=%s", product_id)
     try:
+        # Bloquear usuario demo
+        if get_jwt_identity() == 'demo@blitzshop.com':
+            return jsonify({"error": "Demo account cannot delete products"}), 403
         product = Product.query.get(product_id)
         if not product:
             dt = (perf_counter() - t0) * 1000
