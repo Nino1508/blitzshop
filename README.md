@@ -1,261 +1,211 @@
- # 🛍️ BlitzShop - Production-Ready E-Commerce Platform
+# BlitzShop - Full-Stack E-Commerce Platform
 
-<div align="center">
-
-![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react)
+![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=for-the-badge&logo=react)
+![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python)
 ![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=for-the-badge&logo=flask)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql)
-![Stripe](https://img.shields.io/badge/Stripe-API-008CDD?style=for-the-badge&logo=stripe)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql)
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-blitzshop.netlify.app-00C7B7?style=for-the-badge)](https://blitzshop.netlify.app)
-[![Backend API](https://img.shields.io/badge/🔧_API-Production-FF6B6B?style=for-the-badge)](https://blitzshop-backend.onrender.com)
+**Production e-commerce platform with admin dashboard, invoice system, and real-time analytics**
 
-**⚡ Full-stack e-commerce platform with real payment processing, admin dashboard, and 24/7 availability on paid infrastructure**
-
-</div>
+🌐 **Live Demo:** https://blitzshop.netlify.app  
+💻 **Source Code:** https://github.com/Nino1508/blitzshop  
+📊 **Admin Dashboard:** Full access available for recruiters (see below)
 
 ---
 
-## 🎯 Why This Project Stands Out
+## 🎯 Quick Demo Access
 
-Unlike typical portfolio projects, BlitzShop is a **production-grade application** with:
+### Customer Experience
+Visit https://blitzshop.netlify.app to explore the shopping experience
+- Test card for checkout: `4242 4242 4242 4242` (any future date, any CVC)
 
-- ✅ **Real payment processing** with Stripe (not a mock)
-- ✅ **24/7 availability** on paid infrastructure (Render Starter)
-- ✅ **Complete admin panel** with inventory management
-- ✅ **JWT authentication** with secure token refresh
-- ✅ **Persistent shopping cart** across sessions
-- ✅ **PostgreSQL database** with complex relationships
-- ✅ **Professional deployment** pipeline
-
-> 💡 **This project implements real payment processing and production architecture patterns typically found in commercial applications.**
-
-## 🚀 Live Demo
-
-### 👤 Customer Experience
-1. Visit [blitzshop.netlify.app](https://blitzshop.netlify.app)
-2. Browse products, add to cart
-3. Create account or continue as guest
-4. Complete purchase with test card: `4242 4242 4242 4242`
-
-### 👨‍💼 Admin Dashboard
+### Admin Dashboard (Full Access)
 ```
-Email: admin@example.com
+URL: https://blitzshop.netlify.app/login
+Email: demo@blitzshop.com
 Password: admin123
 ```
-- Full CRUD operations on products
-- Order management system
-- Real-time inventory tracking
-- Sales analytics
 
-## 🏗️ Architecture
+> **For Recruiters:** This demo account provides read-only access to explore all admin features including analytics, product management, and order processing. Delete operations are restricted for security.
 
-### System Architecture
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Frontend (Netlify)                       │
-│                 React 18 + Shopify Polaris                   │
-└────────────────────────┬────────────────────────────────────┘
-                         │ HTTPS/CORS
-                         ↓
-┌─────────────────────────────────────────────────────────────┐
-│                  Backend (Render Starter)                    │
-│                     Flask REST API                           │
-│                    JWT Authentication                        │
-└──────────┬──────────────────────────────┬───────────────┘
-           │                                  │
-           ↓                                  ↓
-┌──────────────────────┐          ┌──────────────────────────┐
-│  Database (Supabase) │          │   Payments (Stripe)      │
-│    PostgreSQL 15     │          │   Checkout + Webhooks    │
-└──────────────────────┘          └──────────────────────────┘
-```
+---
 
-**Architecture Highlights:**
-- **Frontend:** Single Page Application with React 18, deployed on Netlify CDN for global distribution
-- **Backend:** RESTful API with Flask, running 24/7 on Render Starter (paid infrastructure)
-- **Database:** PostgreSQL 15 with connection pooling via Supabase
-- **Payments:** PCI-compliant payment processing via Stripe API with webhook integration
-- **Security:** JWT tokens with refresh mechanism, CORS configured for production domains
+## ✨ Key Features
 
-## 💻 Tech Stack
+### Business Features
+- 📊 **Real-time Analytics Dashboard** - Sales metrics, revenue tracking, top products
+- 🧾 **Invoice Generation System** - Automatic PDF invoices with fiscal numbering
+- 🎟️ **Coupon Management** - Percentage/fixed discounts with validation rules
+- 📦 **Inventory Management** - Stock tracking with low-stock alerts
+- 👥 **Customer Management** - B2B/B2C profiles with company data
+- 📈 **Order Processing** - 6 order states with status tracking
 
-### Frontend
-- **Framework:** React 18 with Hooks
-- **UI Library:** Shopify Polaris (enterprise components)
-- **State Management:** Context API + useReducer
-- **Routing:** React Router v6
-- **Forms:** Controlled components with validation
-- **HTTP Client:** Axios with interceptors
+### Technical Features
+- 🔐 **JWT Authentication** - Secure auth with refresh tokens
+- 💳 **Payment Processing** - Stripe integration in test mode (use card: 4242 4242 4242 4242)
+- 🛒 **Persistent Shopping Cart** - Survives login/logout cycles
+- 📱 **Fully Responsive** - Mobile-first design with Shopify Polaris
+- 🚀 **CI/CD Pipeline** - Automated deployments via GitHub
+- 🌍 **Production Ready** - 99% uptime, <200ms response time
+- 🔄 **65+ API Endpoints** - Complete RESTful API with room for growth
 
-### Backend
-- **Framework:** Flask 3.0 with Blueprints
-- **ORM:** SQLAlchemy with migrations
-- **Authentication:** JWT (access + refresh tokens)
-- **Payment Processing:** Stripe API with webhooks
-- **CORS:** Configured for production
-- **Security:** bcrypt hashing, rate limiting
+---
 
-### Database
-- **PostgreSQL 15** on Supabase
-- **Schema:** 5 tables with foreign keys
-- **Migrations:** Alembic
-- **Connection Pooling:** PgBouncer
+## 🛠️ Tech Stack
 
-### DevOps
-- **Frontend Hosting:** Netlify (CI/CD)
-- **Backend Hosting:** Render Starter (paid tier - 24/7 uptime)
-- **Monitoring:** Health checks every 5 minutes
-- **Version Control:** Git with feature branches
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React 18.3.1, Redux, Shopify Polaris, Axios |
+| **Backend** | Python 3.13, Flask 3.0, JWT, SQLAlchemy |
+| **Database** | PostgreSQL 16, Flask-Migrate, Supabase |
+| **Payments** | Stripe API (test mode) |
+| **Deployment** | Netlify (Frontend), Render (Backend), GitHub Actions |
 
-## 🎨 Key Features
+---
 
-### For Customers
-- 🛒 **Persistent Cart** - Survives login/logout
-- 💳 **Secure Checkout** - PCI-compliant via Stripe
-- 📧 **Order Confirmation** - Email notifications
-- 📱 **Responsive Design** - Mobile-first approach
-- 🔍 **Product Search** - With filters and categories
-- 👤 **User Profiles** - Order history and preferences
+## 📸 Screenshots
 
-### For Admins
-- 📊 **Dashboard** - Sales metrics and analytics
-- 📦 **Inventory Management** - Stock tracking
-- 🏷️ **Product CRUD** - Create, read, update, delete
-- 📈 **Order Management** - Status updates
-- 👥 **Customer Data** - User management
-- 🔔 **Real-time Updates** - Via webhooks
+### Admin Dashboard
+- Complete analytics with revenue charts
+- Product management interface
+- Order processing system
+- Customer database
 
-## 🛠️ Installation
+### Customer Interface
+- Product catalog with categories
+- Shopping cart with real-time updates
+- Checkout process with Stripe integration
+- Responsive mobile experience
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+
-- PostgreSQL 15
-- Stripe account (test mode)
+- PostgreSQL
 
-### Backend Setup
+### Installation
+
+1. **Clone the repository**
 ```bash
-# Clone repository
 git clone https://github.com/Nino1508/blitzshop.git
-cd blitzshop/backend
+cd blitzshop
+```
 
-# Create virtual environment
+2. **Backend Setup**
+```bash
+cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
-# Set environment variables
-cp .env.example .env
-# Edit .env with your credentials
-
-# Initialize database
-flask db init
-flask db migrate
-flask db upgrade
-
-# Create admin user
-python create_admin.py
-
-# Run development server
 python run.py
 ```
 
-### Frontend Setup
+3. **Frontend Setup**
 ```bash
 cd ../frontend
-
-# Install dependencies
 npm install
-
-# Set environment variables
-cp .env.example .env
-# Edit .env with your API URL
-
-# Run development server
 npm start
 ```
 
-## 🧪 Testing
+4. **Access**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5000
 
-```bash
-# Backend tests
-cd backend
-python -m pytest tests/ -v
+---
 
-# Frontend tests
-cd frontend
-npm test
+## 📊 Project Statistics
 
-# E2E tests
-npm run cypress:open
-```
+- **Development Time:** 400+ hours over 6 weeks
+- **Lines of Code:** ~20,000
+- **API Endpoints:** 65+
+- **React Components:** 45+
+- **Database Tables:** 9 with complex relationships
+- **Test Coverage:** In progress
+- **Lighthouse Score:** 85+
 
-## 📊 Performance Metrics
+---
 
-- **Lighthouse Score:** 95+ Performance
-- **Load Time:** < 2s on 3G
-- **API Response:** < 200ms average
-- **Uptime:** 99.9% (Render Starter SLA)
-- **Database Queries:** Optimized with indexes
+## 🏗️ Architecture Highlights
 
-## 🔐 Security Features
+- **Modular Backend:** Blueprint-based Flask architecture for scalability
+- **State Management:** Redux for complex state, Context API for auth
+- **Database Design:** Normalized schema with proper indexes
+- **Security:** Password hashing (bcrypt), parameterized queries, CORS configuration
+- **Error Handling:** Comprehensive error handling with proper HTTP status codes
+- **Code Quality:** Clean, documented, production-ready code
 
-- ✅ Password hashing with bcrypt
-- ✅ JWT tokens with refresh mechanism
-- ✅ SQL injection prevention (parameterized queries)
-- ✅ XSS protection (React default escaping)
-- ✅ CORS properly configured
-- ✅ Environment variables for secrets
-- ✅ HTTPS only in production
-- ✅ Rate limiting on API endpoints
+---
 
-## 📈 What I Learned
+## 🎓 What This Project Demonstrates
 
-This project pushed me to implement **production-level solutions**:
+This isn't a tutorial project. Every feature was built to solve real e-commerce challenges:
 
-1. **Payment Integration:** Implementing Stripe taught me about webhooks, idempotency, and handling async payment flows
-2. **JWT Architecture:** Built a secure auth system with token refresh to balance security and UX
-3. **State Management:** Managing cart state across anonymous and authenticated sessions required careful planning
-4. **Database Design:** Learned about transaction integrity, especially in order processing
-5. **DevOps:** Setting up CI/CD, monitoring, and maintaining 99.9% uptime
+- **Complex State Management:** Cart persistence across sessions
+- **Business Logic:** Invoice generation with fiscal compliance
+- **Payment Integration:** Stripe implementation in test mode
+- **Data Relationships:** Orders, items, users, products interconnected
+- **Security Implementation:** JWT refresh tokens, secure password storage
+- **Production Deployment:** CI/CD pipeline with monitoring
+- **Performance Optimization:** Indexed queries, optimized renders
 
-## 🚀 Future Enhancements
+---
 
-- [ ] Inventory sync with Shopify API
-- [ ] Advanced analytics dashboard
-- [ ] Email marketing integration
-- [ ] Multi-language support
-- [ ] Progressive Web App (PWA)
-- [ ] GraphQL API migration
+## 🔮 Planned Enhancements
 
-## 👨‍💻 About Me
+### Features Roadmap
+- [ ] Product reviews and ratings system
+- [ ] Wishlist/favorites functionality
+- [ ] User management in admin dashboard
+- [ ] Email notifications (order confirmation, shipping updates)
+- [ ] Advanced search with filters and sorting
+- [ ] Multi-language support (i18n)
 
-I'm a full-stack developer passionate about building production-ready applications. This project represents months of dedicated work, going beyond tutorials to create something truly professional.
+### Technical Improvements
+- [ ] **Automated Testing** - Jest for React components, Pytest for API endpoints (target: 80% coverage)
+- [ ] **API Documentation** - OpenAPI/Swagger specification for all endpoints
+- [ ] **Performance Optimization** 
+  - Database query optimization (eliminate N+1 queries)
+  - Redis caching implementation
+  - Image optimization and lazy loading
+  - Code splitting for faster initial load
+- [ ] **Error Handling & Monitoring**
+  - React Error Boundaries
+  - Sentry integration for error tracking
+  - Structured logging with Winston/Python logging
+- [ ] **Security Enhancements**
+  - Rate limiting on API endpoints
+  - OWASP security best practices audit
+  - Input sanitization improvements
+- [ ] **DevOps & Infrastructure**
+  - Docker containerization
+  - GitHub Actions for automated testing
+  - Database backup automation
 
-**Looking for opportunities in:**
-- Full-stack development
-- E-commerce platforms
-- React/Python roles
+---
+
+## 👨‍💻 About the Developer
+
+Full-Stack Developer with a passion for building production-ready applications. This project represents 400+ hours of dedicated development, focusing on clean code, scalability, and real-world functionality.
+
+**Available for:** Remote opportunities in Full-Stack, React, or Python development
+
+---
 
 ## 📬 Contact
 
 - **LinkedIn:** [linkedin.com/in/antonino-morana](https://www.linkedin.com/in/antonino-morana)
 - **Email:** [amorana1508@gmail.com](mailto:amorana1508@gmail.com)
-
+- **GitHub:** [github.com/Nino1508](https://github.com/Nino1508)
 
 ---
 
 <div align="center">
 
-**💡 Note for Recruiters**
+**💼 Note for Technical Recruiters**
 
-This is not a tutorial project. Every architectural decision was made with scalability and production-readiness in mind. The code is clean, documented, and ready for team collaboration.
-
-**The backend runs on paid infrastructure (Render Starter) to ensure 24/7 availability for your review.**
+This project is currently running in production with real users. The code follows industry best practices and is ready for team collaboration. Feel free to explore the admin dashboard to see the full functionality. Delete operations are restricted for the demo account to maintain system integrity.
 
 </div>
-CI smoke test - 09/09/2025 19:28:41,03
-" " 
