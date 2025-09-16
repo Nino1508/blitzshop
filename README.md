@@ -190,7 +190,7 @@ This isn't a tutorial project. Every feature was built to solve real e-commerce 
 
 Full-Stack Developer with a passion for building production-ready applications. This project represents 400+ hours of dedicated development, focusing on clean code, scalability, and real-world functionality.
 
-**Available for:** Remote opportunities in Full-Stack, React, or Python development
+**Available for:** Remote opportunities worldwide or relocation within Europe. Immediate availability.
 
 ---
 
