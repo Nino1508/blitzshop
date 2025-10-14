@@ -6,7 +6,8 @@ import {
   Card,
   Button,
   Text,
-  LegacyStack,
+  BlockStack,
+  InlineStack,
   TextField,
   Select,
   Spinner,
@@ -103,10 +104,10 @@ function ProductList() {
         <Layout>
           <Layout.Section>
             <Card sectioned>
-              <LegacyStack alignment="center">
-                <Spinner variant="headingLg" />
+              <InlineStack gap="400" blockAlign="center">
+                <Spinner size="large" />
                 <Text variant="bodyMd">Loading products...</Text>
-              </LegacyStack>
+              </InlineStack>
             </Card>
           </Layout.Section>
         </Layout>
@@ -184,7 +185,7 @@ function ProductList() {
               {products.map((product) => (
                 <Card key={product.id}>
                   <div style={{ padding: '16px' }}>
-                    <LegacyStack vertical spacing="tight">
+                    <BlockStack gap="200">
                       {/* Product Image */}
                       <div 
                         style={{ 
@@ -226,46 +227,49 @@ function ProductList() {
                       </div>
 
                       {/* Product Info */}
-                      <LegacyStack vertical spacing="extraTight">
+                      <BlockStack gap="100">
                         <Text 
                           variant="headingMd" 
                           as="h3"
-                          style={{ cursor: 'pointer' }}
+                          style={{ cursor: 'pointer', textAlign: 'center' }}
                           onClick={() => handleProductClick(product.id)}
                         >
                           {product.name}
                         </Text>
                         
                         {product.category && (
-                          <Badge size="small">{product.category}</Badge>
+                          <div style={{ alignSelf: 'center' }}>
+                            <Badge size="small">{product.category}</Badge>
+                          </div>
                         )}
                         
-                        <Text variant="bodyMd" color="subdued">
+                        <Text variant="bodyMd" color="subdued" alignment="center">
                           {product.description?.substring(0, 100)}
                           {product.description?.length > 100 && '...'}
                         </Text>
-                      </LegacyStack>
+                      </BlockStack>
 
-                      {/* Price and Actions */}
-                      <LegacyStack distribution="equalSpacing" alignment="center">
-                        <div>
-                          {product.discount_percentage && product.discount_percentage > 0 ? (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                              <Text variant="bodyMd" tone="subdued" textDecorationLine="line-through">
-                                €{product.price}
-                              </Text>
-                              <Text variant="headingLg" tone="success">
-                                €{(product.price * (1 - product.discount_percentage/100)).toFixed(2)}
-                              </Text>
-                            </div>
-                          ) : (
-                            <Text variant="headingLg" as="p">
+                      {/* Price */}
+                      <div style={{ alignSelf: 'center', textAlign: 'center' }}>
+                        {product.discount_percentage && product.discount_percentage > 0 ? (
+                          <BlockStack gap="100">
+                            <Text variant="bodyMd" tone="subdued" textDecorationLine="line-through" alignment="center">
                               €{product.price}
                             </Text>
-                          )}
-                        </div>
-                        
-                        <LegacyStack spacing="tight">
+                            <Text variant="headingLg" tone="success" alignment="center">
+                              €{(product.price * (1 - product.discount_percentage/100)).toFixed(2)}
+                            </Text>
+                          </BlockStack>
+                        ) : (
+                          <Text variant="headingLg" as="p" alignment="center">
+                            €{product.price}
+                          </Text>
+                        )}
+                      </div>
+                      
+                      {/* Action Buttons */}
+                      <div style={{ alignSelf: 'center' }}>
+                        <InlineStack gap="200">
                           <Button
                             onClick={() => handleProductClick(product.id)}
                           >
@@ -279,14 +283,16 @@ function ProductList() {
                           >
                             {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                           </Button>
-                        </LegacyStack>
-                      </LegacyStack>
+                        </InlineStack>
+                      </div>
 
                       {/* Stock Info */}
-                      <Text variant="bodySm" color="subdued">
-                        {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
-                      </Text>
-                    </LegacyStack>
+                      <div style={{ alignSelf: 'center' }}>
+                        <Text variant="bodySm" color="subdued" alignment="center">
+                          {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                        </Text>
+                      </div>
+                    </BlockStack>
                   </div>
                 </Card>
               ))}

@@ -5,7 +5,7 @@ from app import db
 from app.models.coupon import Coupon, CouponUsage
 from app.models.user import User
 from app.routes.admin import admin_required
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import or_, and_
 from decimal import Decimal
 import logging
@@ -164,7 +164,7 @@ def get_coupons():
             like = f'%{search}%'
             query = query.filter(or_(Coupon.code.ilike(like), Coupon.description.ilike(like)))
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         if status == 'active':
             query = query.filter(
                 and_(
@@ -219,7 +219,7 @@ def create_coupon():
             max_discount=_to_decimal(data.get('max_discount')),
             usage_limit=_to_int(data.get('usage_limit')) or 0,
             usage_limit_per_user=_to_int(data.get('usage_limit_per_user')) or 1,
-            valid_from=_parse_iso(data.get('valid_from')) or datetime.utcnow(),
+            valid_from=_parse_iso(data.get('valid_from')) or datetime.now(timezone.utc),
             valid_until=_parse_iso(data.get('valid_until')),
             is_active=_to_bool(data.get('is_active'), True),
         )
@@ -286,7 +286,7 @@ def update_coupon(coupon_id):
         if 'valid_until' in data:
             coupon.valid_until = _parse_iso(data.get('valid_until'))
 
-        coupon.updated_at = datetime.utcnow()
+        coupon.updated_at = datetime.now(timezone.utc)
         db.session.commit()
 
         logger.info(f"Coupon {coupon.code} updated by admin")

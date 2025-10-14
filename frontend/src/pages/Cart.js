@@ -6,7 +6,8 @@ import {
   Card,
   Button,
   Text,
-  LegacyStack,
+  BlockStack,
+  InlineStack,
   EmptyState,
   DataTable,
   Banner
@@ -195,14 +196,14 @@ function Cart() {
               <p>Please sign in to view your cart.</p>
             </Banner>
             <div style={{ marginTop: '16px' }}>
-              <LegacyStack>
+              <InlineStack gap="400">
                 <Button primary onClick={() => navigate('/login')}>
                   Sign In
                 </Button>
                 <Button onClick={() => navigate('/register')}>
                   Create Account
                 </Button>
-              </LegacyStack>
+              </InlineStack>
             </div>
           </Layout.Section>
         </Layout>
@@ -481,8 +482,8 @@ function Cart() {
 
         <Layout.Section>
           <Card sectioned>
-            <LegacyStack distribution="equalSpacing" alignment="center">
-              <LegacyStack vertical spacing="tight">
+            <InlineStack align="space-between" blockAlign="center" wrap={false}>
+              <BlockStack gap="200">
                 <Text variant="headingMd" as="h3">
                   Cart Summary
                 </Text>
@@ -492,9 +493,9 @@ function Cart() {
                 <Text variant="displaySmall" as="p">
                   Total: {formatPrice(getTotalPrice())}
                 </Text>
-              </LegacyStack>
+              </BlockStack>
 
-              <LegacyStack vertical spacing="tight">
+              <BlockStack gap="200">
                 <Button primary size="large" onClick={handleCheckout}>
                   Proceed to Checkout
                 </Button>
@@ -504,8 +505,8 @@ function Cart() {
                 <Button destructive plain onClick={handleClearCart}>
                   Clear Cart
                 </Button>
-              </LegacyStack>
-            </LegacyStack>
+              </BlockStack>
+            </InlineStack>
           </Card>
         </Layout.Section>
       </Layout>

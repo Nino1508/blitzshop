@@ -5,7 +5,7 @@ from app.models.invoice import Invoice, InvoiceSettings
 from app.models.order import Order
 from app.models.user import User
 from app.routes.admin import admin_required
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 import logging
 from time import perf_counter
@@ -231,8 +231,8 @@ def admin_create_invoice(order_id):
             invoice_number=Invoice.generate_invoice_number(settings.invoice_prefix),
             order_id=order_id,
             user_id=order.user_id,
-            issue_date=datetime.utcnow(),
-            due_date=datetime.utcnow() + timedelta(days=settings.payment_terms_days),
+            issue_date=datetime.now(timezone.utc),
+            due_date=datetime.now(timezone.utc) + timedelta(days=settings.payment_terms_days),
             subtotal=totals['subtotal'],
             tax_rate=Decimal(str(data.get('tax_rate', float(settings.default_tax_rate)))),
             tax_amount=totals['tax_amount'],
@@ -304,7 +304,7 @@ def admin_update_invoice(invoice_id):
         if 'status' in data:
             invoice.status = data['status']
             if data['status'] == 'paid':
-                invoice.payment_date = datetime.utcnow()
+                invoice.payment_date = datetime.now(timezone.utc)
         
         if 'notes' in data:
             invoice.notes = data['notes']
@@ -312,7 +312,7 @@ def admin_update_invoice(invoice_id):
         if 'payment_method' in data:
             invoice.payment_method = data['payment_method']
         
-        invoice.updated_at = datetime.utcnow()
+        invoice.updated_at = datetime.now(timezone.utc)
         db.session.commit()
         
         elapsed = perf_counter() - start_time
@@ -342,7 +342,7 @@ def admin_delete_invoice(invoice_id):
         
         # Soft delete - just change status
         invoice.status = 'cancelled'
-        invoice.updated_at = datetime.utcnow()
+        invoice.updated_at = datetime.now(timezone.utc)
         db.session.commit()
         
         elapsed = perf_counter() - start_time
@@ -460,7 +460,7 @@ def update_invoice_settings():
                 else:
                     setattr(settings, field, data[field])
         
-        settings.updated_at = datetime.utcnow()
+        settings.updated_at = datetime.now(timezone.utc)
         db.session.commit()
         
         logger.info("Invoice settings updated successfully")

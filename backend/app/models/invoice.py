@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from sqlalchemy import func
 
@@ -12,7 +12,7 @@ class Invoice(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     # Dates
-    issue_date = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    issue_date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     due_date = db.Column(db.DateTime)
     
     # Amounts (stored as Decimal for precision)
@@ -58,8 +58,8 @@ class Invoice(db.Model):
     pdf_generated_at = db.Column(db.DateTime)
     
     # Metadata
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     
     # Relationships
     order = db.relationship('Order', backref='invoices', lazy=True)
@@ -70,7 +70,7 @@ class Invoice(db.Model):
         """
         Generate sequential invoice number with format: INV-2025-00001
         """
-        current_year = datetime.utcnow().year
+        current_year = datetime.now(timezone.utc).year
         
         # Get the last invoice number for current year
         last_invoice = db.session.query(Invoice).filter(

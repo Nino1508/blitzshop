@@ -217,7 +217,7 @@ def update_profile():
                 user.email = new_email
 
         # Actualizar timestamp
-        user.updated_at = datetime.utcnow()
+        user.updated_at = datetime.now(timezone.utc)
         
         db.session.commit()
 

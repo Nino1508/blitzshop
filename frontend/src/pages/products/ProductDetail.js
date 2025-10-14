@@ -6,7 +6,8 @@ import {
   Card,
   Button,
   Text,
-  LegacyStack,
+  BlockStack,
+  InlineStack,
   Badge,
   Spinner,
   Banner
@@ -77,10 +78,10 @@ function ProductDetail() {
         <Layout>
           <Layout.Section>
             <Card sectioned>
-              <LegacyStack alignment="center">
-                <Spinner variant="headingLg" />
+              <InlineStack gap="400" blockAlign="center">
+                <Spinner size="large" />
                 <Text variant="bodyMd">Loading product...</Text>
-              </LegacyStack>
+              </InlineStack>
             </Card>
           </Layout.Section>
         </Layout>
@@ -147,8 +148,8 @@ function ProductDetail() {
         <Layout.Section oneHalf>
           {/* Product Details */}
           <Card sectioned>
-            <LegacyStack vertical spacing="loose">
-              <LegacyStack vertical spacing="tight">
+            <BlockStack gap="500">
+              <BlockStack gap="200">
                 <Text variant="displayMedium" as="h1">
                   {product.name}
                 </Text>
@@ -156,7 +157,7 @@ function ProductDetail() {
                 {product.category && (
                   <Badge variant="headingMd">{product.category}</Badge>
                 )}
-              </LegacyStack>
+              </BlockStack>
 
               <Text variant="displaySmall" as="p">
                 ${product.price}
@@ -182,10 +183,10 @@ function ProductDetail() {
                 </Text>
               </div>
 
-              <LegacyStack>
+              <InlineStack gap="400">
                 <Button
                   primary
-                  variant="headingLg"
+                  size="large"
                   onClick={handleAddToCart}
                   disabled={!product.is_active || product.stock === 0 || addingToCart}
                   loading={addingToCart}
@@ -194,12 +195,12 @@ function ProductDetail() {
                 </Button>
                 
                 <Button
-                  variant="headingLg"
+                  size="large"
                   onClick={handleGoBack}
                 >
                   ← Back to Products
                 </Button>
-              </LegacyStack>
+              </InlineStack>
 
               {!isAuthenticated() && (
                 <Banner status="info">
@@ -214,7 +215,7 @@ function ProductDetail() {
                   </p>
                 </Banner>
               )}
-            </LegacyStack>
+            </BlockStack>
           </Card>
         </Layout.Section>
       </Layout>
