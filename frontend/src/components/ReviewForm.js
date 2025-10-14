@@ -35,10 +35,10 @@ const ReviewForm = ({ productId, existingReview, onSuccess, onCancel }) => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('ecommerce-jwt-token');
       const endpoint = existingReview 
-        ? `/reviews/${existingReview.id}`
-        : `/products/${productId}/reviews`;
+        ? `/api/reviews/${existingReview.id}`
+        : `/api/products/${productId}/reviews`;
       
       const method = existingReview ? 'PUT' : 'POST';
 
