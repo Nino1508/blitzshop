@@ -14,6 +14,7 @@ import {
 } from '@shopify/polaris';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
+import ReviewSection from '../../components/ReviewSection';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -217,6 +218,11 @@ function ProductDetail() {
               )}
             </BlockStack>
           </Card>
+        </Layout.Section>
+        
+        {/* Reviews Section */}
+        <Layout.Section>
+          <ReviewSection productId={id} />
         </Layout.Section>
       </Layout>
     </Page>
