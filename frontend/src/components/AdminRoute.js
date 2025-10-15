@@ -8,7 +8,7 @@ import { Card, Page, Layout, Text, TextContainer, Button } from '@shopify/polari
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
-  // Mostrar loading mientras se verifica autenticación
+  // Show loading while verifying authentication
   if (loading) {
     return (
       <Page title="Loading...">
@@ -27,7 +27,7 @@ const AdminRoute = ({ children }) => {
     );
   }
 
-  // Redirigir a login si no está autenticado
+  // Redirect to login if not authenticated
   if (!user) {
     return <Navigate to="/login" replace />;
   }

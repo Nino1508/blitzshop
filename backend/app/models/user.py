@@ -16,8 +16,8 @@ class User(db.Model):
     phone = db.Column(db.String(20))
     date_of_birth = db.Column(db.Date)
     
-    # CAMPOS PROFESIONALES NUEVOS - DIRECCIÓN ESTRUCTURADA
-    address = db.Column(db.String(200))  # Calle y número
+    # NEW PROFESSIONAL FIELDS - STRUCTURED ADDRESS
+    address = db.Column(db.String(200))  # Street and number
     city = db.Column(db.String(100))
     state = db.Column(db.String(100))
     postal_code = db.Column(db.String(20))
@@ -31,7 +31,7 @@ class User(db.Model):
     billing_address = db.Column(db.String(500))  # Mantener temporalmente
     shipping_address = db.Column(db.String(500))  # Mantener temporalmente
     
-    # CONFIGURACIÓN Y ESTADO
+    # CONFIGURATION AND STATUS
     is_admin = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
     email_notifications = db.Column(db.Boolean, default=True)
@@ -120,7 +120,7 @@ class User(db.Model):
             'billing_address': self.billing_address,
             'shipping_address': self.shipping_address,
             
-            # Configuración
+            # Configuration
             'is_admin': self.is_admin,
             'is_active': self.is_active,
             'email_notifications': self.email_notifications,

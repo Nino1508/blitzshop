@@ -52,7 +52,7 @@ const DeleteAccountModal = ({ open, onClose }) => {
       if (response.status === 200) {
         setSuccess(true);
         
-        // Esperar 2 segundos para mostrar el mensaje de éxito, luego logout
+        // Wait 2 seconds to show success message, then logout
         setTimeout(() => {
           logout();
           navigate('/');
@@ -70,7 +70,7 @@ const DeleteAccountModal = ({ open, onClose }) => {
   };
 
   const handleClose = () => {
-    if (!success) {  // Solo permitir cerrar si no está en proceso de eliminación exitosa
+    if (!success) {  // Only allow closing if not in successful deletion process
       setPassword('');
       setShowPassword(false);
       setError('');

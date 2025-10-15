@@ -9,7 +9,7 @@ import CouponInput from '../components/CouponInput';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-// Tu clave pública de Stripe
+// Your Stripe public key
 const stripePromise = loadStripe('pk_test_51RvJEnAqoyGnpREmRiEBoqyrP4n1Kc4gJb5bLn52EQVQNw1UZ36aw5nEbrKmB687SVHTtJSfZeWvFRKedxLBbx2h00PML3njPq');
 
 // Componente de formulario de pago
@@ -201,7 +201,7 @@ const Checkout = () => {
       setOrder(data.order);
       setFinalTotal(data.order.final_amount || data.order.total_amount);
       
-      // Si la orden ya tiene un cupón aplicado
+      // If order already has a coupon applied
       if (data.order.coupon_code) {
         setAppliedCoupon({
           code: data.order.coupon_code,
@@ -217,10 +217,10 @@ const Checkout = () => {
     }
   };
 
-  // Función para manejar aplicación de cupones
+  // Function to handle coupon application
   const handleCouponApplied = async (coupon) => {
     try {
-      // Aplicar cupón a la orden existente
+      // Apply coupon to existing order
       const response = await fetch(`${API_URL}/api/coupons/apply`, {
         method: 'POST',
         headers: {

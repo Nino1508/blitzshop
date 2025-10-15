@@ -63,7 +63,7 @@ def serialize_user_public(u: User):
         "phone": getattr(u, "phone", None),
         "date_of_birth": (u.date_of_birth.isoformat() if getattr(u, "date_of_birth", None) else None),
         
-        # Dirección estructurada
+        # Structured address
         "address": getattr(u, "address", None),
         "city": getattr(u, "city", None),
         "state": getattr(u, "state", None),
@@ -79,7 +79,7 @@ def serialize_user_public(u: User):
         "billing_address": getattr(u, "billing_address", None),
         "shipping_address": getattr(u, "shipping_address", None),
         
-        # Configuración
+        # Configuration
         "is_admin": getattr(u, "is_admin", False),
         "is_active": getattr(u, "is_active", True),
         "email_notifications": getattr(u, "email_notifications", True),
@@ -131,13 +131,13 @@ def update_profile():
 
         data = request.get_json() or {}
         
-        # Validaciones básicas
+        # Basic validations
         if "first_name" in data and not data.get("first_name", "").strip():
             return error_response(400, "First name is required")
         if "last_name" in data and not data.get("last_name", "").strip():
             return error_response(400, "Last name is required")
 
-        # CAMPOS BÁSICOS
+        # BASIC FIELDS
         if "first_name" in data:
             user.first_name = (data["first_name"] or "").strip()
         if "last_name" in data:
@@ -146,7 +146,7 @@ def update_profile():
         # CAMPOS PROFESIONALES NUEVOS
         if "phone" in data:
             phone = (data["phone"] or "").strip()
-            # Validación básica de teléfono
+            # Basic phone validation
             if phone and len(phone) < 9:
                 return error_response(400, "Invalid phone number")
             user.phone = phone or None
@@ -157,7 +157,7 @@ def update_profile():
             except:
                 return error_response(400, "Invalid date format for date_of_birth")
         
-        # DIRECCIÓN ESTRUCTURADA
+        # STRUCTURED ADDRESS
         if "address" in data:
             user.address = (data["address"] or "").strip() or None
         if "city" in data:
@@ -166,7 +166,7 @@ def update_profile():
             user.state = (data["state"] or "").strip() or None
         if "postal_code" in data:
             postal = (data["postal_code"] or "").strip()
-            # Validación básica código postal España
+            # Basic validation for Spanish postal code
             if postal and user.country == "ES" and (len(postal) != 5 or not postal.isdigit()):
                 return error_response(400, "Invalid postal code for Spain (must be 5 digits)")
             user.postal_code = postal or None
@@ -193,7 +193,7 @@ def update_profile():
         if "email_notifications" in data:
             user.email_notifications = bool(data.get("email_notifications", True))
 
-        # USERNAME (validación especial)
+        # USERNAME (special validation)
         if "username" in data:
             new_username = (data["username"] or "").strip()
             if new_username and new_username != user.username:
@@ -207,7 +207,7 @@ def update_profile():
                     return error_response(400, "Username already taken")
                 user.username = new_username
 
-        # EMAIL (validación especial)
+        # EMAIL (special validation)
         if "email" in data:
             new_email = (data["email"] or "").lower().strip()
             if new_email and new_email != user.email:

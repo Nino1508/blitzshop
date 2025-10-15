@@ -17,7 +17,7 @@ from app.models.user import User
 analytics_bp = Blueprint('analytics', __name__)
 logger = logging.getLogger(__name__)
 
-# ============== Helpers (estándares de datos y validaciones) ==============
+# ============== Helpers (data standards and validations) ==============
 
 def to_float(v) -> float:
     if v is None:
@@ -288,7 +288,7 @@ def get_top_products():
             desc('revenue'), desc('units_sold')
         ).limit(limit).all()
 
-        # Devolver array directo, no objeto con paginación
+        # Return direct array, not object with pagination
         data = [{
             'id': row.pid,
             'name': row.name,
@@ -452,7 +452,7 @@ def export_analytics():
         
         # Aceptar tanto 'days' como 'start_date/end_date'
         if request.args.get('start_date') and request.args.get('end_date'):
-            # Si vienen fechas explícitas, usarlas
+            # If explicit dates come, use them
             start_date = parse_date_param('start_date', required=True)
             end_date = parse_date_param('end_date', required=True)
         else:

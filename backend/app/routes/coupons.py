@@ -13,7 +13,7 @@ import logging
 coupons_bp = Blueprint('coupons', __name__)
 logger = logging.getLogger(__name__)
 
-# -------- helpers de sanitización --------
+# -------- sanitization helpers --------
 def _to_decimal(val):
     if val in (None, '', 'null'):
         return None

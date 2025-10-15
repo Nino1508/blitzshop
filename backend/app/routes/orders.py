@@ -276,7 +276,7 @@ def admin_get_all_orders():
                     "shipping_address": order.user.shipping_address or order.user.address or ""
                 }
             else:
-                # Si no hay usuario (no debería pasar), enviar datos vacíos
+                # If no user (should not happen), send empty data
                 order_dict["user"] = {
                     "username": "Guest",
                     "email": "",

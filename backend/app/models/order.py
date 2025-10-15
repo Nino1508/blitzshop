@@ -19,7 +19,7 @@ class Order(db.Model):
     
     # Relationships
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
-    # ⚠️ Importante: NO definimos user aquí, ya viene del backref en User.orders
+    # ⚠️ Important: We do NOT define user here, it comes from backref in User.orders
 
     def __init__(self, user_id, total_amount, shipping_address=None, billing_address=None):
         self.user_id = user_id

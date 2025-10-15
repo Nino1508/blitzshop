@@ -1,1 +1,42 @@
-.env 
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+
+# Database files (NEVER commit local databases)
+instance/*.db
+instance/*.db-journal
+*.sqlite
+*.sqlite3
+
+# Environment variables (CONTAINS SECRETS)
+.env
+.env.local
+.env.production
+
+# Flask
+instance/
+.webassets-cache
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Migrations (keep directory structure, but instance data is ignored)
+# migrations/versions/*.pyc is already covered by *.pyc above

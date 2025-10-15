@@ -43,7 +43,7 @@ const Analytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("7");
   const [viewMode, setViewMode] = useState("daily");
 
-  // Obtener token de localStorage - tu app original lo guarda así
+  // Get token from localStorage
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token') || localStorage.getItem('ecommerce-jwt-token');
     return token ? {
@@ -54,12 +54,12 @@ const Analytics = () => {
     };
   };
 
-  // Función para formatear precios en euros
+  // Function to format prices in euros
   const formatPrice = useCallback((value) =>
     `€${Number(value || 0).toFixed(2)}`, []
   );
 
-  // Opciones de período y vista
+  // Period and view options
   const periodOptions = [
     { label: "Last 7 days", value: "7" },
     { label: "Last 30 days", value: "30" },
@@ -71,7 +71,7 @@ const Analytics = () => {
     { label: "Monthly", value: "monthly" }
   ];
 
-  // Cargar datos cuando el componente se monta o cambia el período
+  // Load data when component mounts or period changes
   useEffect(() => {
     const fetchAnalyticsData = async () => {
       try {
@@ -166,7 +166,7 @@ const Analytics = () => {
           console.log('No real data available, using demo data');
           setError('Using demo data - Backend may not be configured');
           
-          // Datos demo para visualización
+          // Demo data for visualization
           setMetrics({
             total_revenue: 15234.50,
             today_revenue: 543.20,
@@ -220,7 +220,7 @@ const Analytics = () => {
     fetchAnalyticsData();
   }, [selectedPeriod]);
 
-  // Función para exportar datos
+  // Function to export data
   const handleExportData = useCallback(async (type) => {
     try {
       const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';

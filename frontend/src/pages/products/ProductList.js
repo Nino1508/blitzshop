@@ -82,9 +82,7 @@ function ProductList() {
     }
 
     const result = await addToCart(productId, 1);
-    if (result.success) {
-      console.log('Product added to cart');
-    } else {
+    if (!result.success) {
       console.error('Failed to add to cart:', result.error);
     }
   };

@@ -28,7 +28,7 @@ import {
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-// Helpers de normalización (evitan '' en campos numéricos/fechas)
+// Normalization helpers (prevent '' en campos numéricos/fechas)
 const num = (v) => (v === '' || v === undefined || v === null ? null : Number(v));
 const iso = (d) => (d ? new Date(d).toISOString() : null);
 
@@ -135,7 +135,7 @@ function ManageCoupons() {
   // Handle form submission
   const handleSubmit = async () => {
     setFormErrors({});
-    // Validación básica
+    // Basic validation
     const errors = {};
     if (!formData.code) errors.code = 'Coupon code is required';
     if (!formData.discount_value || parseFloat(formData.discount_value) <= 0) {
@@ -149,7 +149,7 @@ function ManageCoupons() {
       return;
     }
 
-    // Normalizar payload ('' → null, números → Number, fechas → ISO)
+    // Normalize payload ('' → null, números → Number, fechas → ISO)
     const payload = {
       code: (formData.code || '').toUpperCase(),
       description: formData.description || '',

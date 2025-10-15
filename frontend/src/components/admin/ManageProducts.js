@@ -141,7 +141,7 @@ const ManageProducts = () => {
     setShowDeleteModal(true);
   };
 
-  // Manejo de imágenes
+  // Image handling
   const handleImageDrop = (files) => {
     const file = files[0];
     if (file) {
@@ -244,7 +244,7 @@ const ManageProducts = () => {
     }
   };
 
-  // Configuración de filtros
+  // Filter configuration
   const handleFiltersQueryChange = (value) => {
     setQueryValue(value);
     setCurrentPage(1);
@@ -261,7 +261,7 @@ const ManageProducts = () => {
     setCurrentPage(1);
   };
 
-  // Configuración de la tabla
+  // Table configuration
   const rows = products.map((product) => [
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       {product.image_url && (

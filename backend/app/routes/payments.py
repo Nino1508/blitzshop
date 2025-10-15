@@ -149,7 +149,7 @@ def confirm_payment():
         # Consultar estado real en Stripe
         intent = stripe.PaymentIntent.retrieve(payment_intent_id)
 
-        # Actualizar estado local según Stripe
+        # Update local state according to Stripe
         if intent.status == "succeeded":
             _set_order_status(order, "paid")
         elif intent.status in ("canceled", "requires_payment_method"):
@@ -199,7 +199,7 @@ def stripe_webhook():
         sig_header = request.headers.get("Stripe-Signature")
 
         if not STRIPE_WEBHOOK_SECRET:
-            # Si no está configurado, no podemos verificar la firma
+            # If not configured, we cannot verify signature
             logger.warning("[payments.webhook.error] missing_webhook_secret")
             return error_response(500, "Webhook not configured")
 
@@ -242,11 +242,11 @@ def stripe_webhook():
 
         dt = (perf_counter() - t0) * 1000
         logger.info("[payments.webhook.ok] status=200 ms=%.2f type=%s", dt, event["type"])
-        # Stripe espera 2xx sin cuerpo específico
+        # Stripe expects 2xx without specific body
         return jsonify({"ok": True}), 200
 
     except Exception as e:
         dt = (perf_counter() - t0) * 1000
         logger.exception("[payments.webhook.error] ms=%.2f err=%s", dt, str(e))
-        # Importante: responder 2xx sólo si Stripe debe reintentar; aquí devolvemos 500 para reintento
+        # Important: respond 2xx only if Stripe should retry; here we return 500 for retry
         return error_response(500, "Webhook processing error", str(e))

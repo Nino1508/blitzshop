@@ -29,7 +29,7 @@ class Product(db.Model):
         self.category = category
         self.image_url = image_url
         self.is_active = is_active
-        self.discount_percentage = discount_percentage  # AÑADIDO AL CONSTRUCTOR
+        self.discount_percentage = discount_percentage  # ADDED TO CONSTRUCTOR
     
     # Propiedad para compatibilidad con stock_quantity
     @property
@@ -51,8 +51,8 @@ class Product(db.Model):
             'name': self.name,
             'description': self.description,
             'price': float(self.price),
-            'sale_price': round(sale_price, 2) if sale_price else None,  # AÑADIDO
-            'discount_percentage': self.discount_percentage,  # AÑADIDO
+            'sale_price': round(sale_price, 2) if sale_price else None,  # ADDED
+            'discount_percentage': self.discount_percentage,  # ADDED
             'stock': self.stock,
             'stock_quantity': self.stock,
             'category': self.category,

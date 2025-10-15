@@ -22,7 +22,7 @@ const EditProfileModal = ({ open, onClose, user, onSuccess }) => {
   const [success, setSuccess] = useState(false);
   const [isCompany, setIsCompany] = useState(false);
   
-  // Lista completa de países del mundo - 249 países
+  // Complete list of world countries - 249 countries
   const countryOptions = countryList.getData().map(country => ({
     label: country.name,
     value: country.code.toUpperCase()
@@ -30,7 +30,7 @@ const EditProfileModal = ({ open, onClose, user, onSuccess }) => {
   
   // Form fields - incluir TODOS los campos profesionales
   const [formData, setFormData] = useState({
-    // Datos básicos
+    // Basic data
     username: user?.username || '',
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
@@ -39,7 +39,7 @@ const EditProfileModal = ({ open, onClose, user, onSuccess }) => {
     // Contacto
     phone: user?.phone || '',
     
-    // Dirección
+    // Address
     address: user?.address || '',
     city: user?.city || '',
     state: user?.state || '',
@@ -95,7 +95,7 @@ const EditProfileModal = ({ open, onClose, user, onSuccess }) => {
   }, []);
 
   const validateForm = () => {
-    // Validaciones básicas
+    // Basic validations
     if (!formData.first_name.trim()) {
       setError('First name is required');
       return false;
@@ -105,13 +105,13 @@ const EditProfileModal = ({ open, onClose, user, onSuccess }) => {
       return false;
     }
     
-    // Validar teléfono si está presente
+    // Validate phone if present
     if (formData.phone && formData.phone.length < 9) {
       setError('Please enter a valid phone number');
       return false;
     }
     
-    // Validar código postal español
+    // Validate Spanish postal code
     if (formData.postal_code && formData.country === 'ES') {
       if (formData.postal_code.length !== 5 || !/^\d{5}$/.test(formData.postal_code)) {
         setError('Spanish postal code must be 5 digits');

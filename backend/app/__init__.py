@@ -35,8 +35,8 @@ def _setup_logging(app: Flask) -> None:
     if not has_console:
         app.logger.addHandler(console)
 
-    # Opcional: propagar a root para que otros módulos (p.ej. app.routes.analytics)
-    # también impriman sin configurar cada uno.
+    # Optional: propagate to root so other modules (e.g. app.routes.analytics)
+    # also print without configuring each one.
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
     root_has_console = any(isinstance(h, logging.StreamHandler) for h in root_logger.handlers)
@@ -50,12 +50,12 @@ def create_app():
     _setup_logging(app)
     app.logger.info("[app.start] Configurando BlitzShop API")
 
-    # Configuración de la aplicación
+    # Application configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///ecommerce.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Configuración JWT
+    # JWT configuration
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-change-in-production')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
@@ -85,7 +85,7 @@ def create_app():
     )
     # ------------------------------------------------------------
 
-    # Registrar blueprints (rutas)
+    # Register blueprints (routes)
     from app.routes.auth import auth_bp
     from app.routes.products import products_bp
     from app.routes.admin import admin_bp

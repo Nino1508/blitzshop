@@ -66,7 +66,7 @@ def serialize_product(p: Product):
     }
 
 
-# Decorador admin_required según tu estándar
+# admin_required decorator according to your standard
 def admin_required(fn):
     @jwt_required()
     def wrapper(*args, **kwargs):
@@ -79,7 +79,7 @@ def admin_required(fn):
     return wrapper
 
 # -----------------------------
-# Endpoints públicos
+# Public endpoints
 # -----------------------------
 
 @products_bp.route("/", methods=["GET"])

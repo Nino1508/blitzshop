@@ -17,7 +17,7 @@ const StarRating = ({
   const totalStars = 5;
   const isInteractive = !readonly && onRatingChange;
   
-  // Tamaños en pixels
+  // Sizes in pixels
   const sizes = {
     small: 16,
     medium: 20,

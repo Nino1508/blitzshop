@@ -62,7 +62,7 @@ const ReviewForm = ({ productId, existingReview, onSuccess, onCancel }) => {
 
       const data = await response.json();
       
-      // Llamar al callback de éxito
+      // Call success callback
       if (onSuccess) {
         onSuccess(data.review);
       }

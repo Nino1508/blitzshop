@@ -46,7 +46,7 @@ const ReviewSection = ({ productId }) => {
         totalReviews: response.data.total_reviews || 0
       });
       
-      // Verificar si el usuario ya dejó una review
+      // Check if user already left a review
       if (isLoggedIn) {
         const userReviewInList = response.data.reviews.find(
           r => r.user_id === getCurrentUserId()

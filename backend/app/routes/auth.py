@@ -83,13 +83,13 @@ def register():
         if username is not None:
             username = username.strip()
 
-        # Email único (case-insensitive)
+        # Unique email (case-insensitive)
         if User.query.filter(func.lower(User.email) == email.lower()).first():
             dt = (perf_counter() - t0) * 1000
             logger.info("[auth.register.ok] status=400 ms=%.2f reason=email_exists", dt)
             return error_response(400, "Email already registered")
 
-        # Username único si viene (case-insensitive)
+        # Unique username if provided (case-insensitive)
         if username:
             if User.query.filter(func.lower(User.username) == username.lower()).first():
                 dt = (perf_counter() - t0) * 1000
