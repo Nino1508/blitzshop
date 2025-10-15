@@ -151,21 +151,27 @@ function ProductDetail() {
           <Card sectioned>
             <BlockStack gap="500">
               <BlockStack gap="200">
-                <Text variant="displayMedium" as="h1">
-                  {product.name}
-                </Text>
+                <div style={{ textAlign: 'center' }}>
+                  <Text variant="displayMedium" as="h1">
+                    {product.name}
+                  </Text>
+                </div>
                 
                 {product.category && (
-                  <Badge variant="headingMd">{product.category}</Badge>
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <Badge variant="headingMd">{product.category}</Badge>
+                  </div>
                 )}
               </BlockStack>
 
-              <Text variant="displaySmall" as="p">
-                ${product.price}
-              </Text>
+              <div style={{ textAlign: 'center' }}>
+                <Text variant="displaySmall" as="p">
+                  ${product.price}
+                </Text>
+              </div>
 
               {product.description && (
-                <div>
+                <div style={{ textAlign: 'center' }}>
                   <Text variant="headingMd" as="h3">
                     Description
                   </Text>
@@ -175,7 +181,7 @@ function ProductDetail() {
                 </div>
               )}
 
-              <div>
+              <div style={{ textAlign: 'center' }}>
                 <Text variant="bodyMd" as="p">
                   <strong>Stock:</strong> {product.stock > 0 ? `${product.stock} available` : 'Out of stock'}
                 </Text>
@@ -184,7 +190,7 @@ function ProductDetail() {
                 </Text>
               </div>
 
-              <InlineStack gap="400">
+              <InlineStack gap="400" align="center">
                 <Button
                   primary
                   size="large"
