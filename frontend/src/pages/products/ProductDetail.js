@@ -166,7 +166,7 @@ function ProductDetail() {
 
               <div style={{ textAlign: 'center' }}>
                 <Text variant="displaySmall" as="p">
-                  ${product.price}
+                  €{product.price}
                 </Text>
               </div>
 

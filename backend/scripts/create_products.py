@@ -198,7 +198,7 @@ def create_test_products():
         for product_data in products:
             product = Product(**product_data)
             db.session.add(product)
-            print(f"✅ Creando: {product_data['name']} - ${product_data['price']} ({product_data['category']})")
+            print(f"✅ Creando: {product_data['name']} - €{product_data['price']} ({product_data['category']})")
         
         db.session.commit()
         print(f"\n🎉 {len(products)} productos VARIADOS creados!")
