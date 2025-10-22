@@ -184,8 +184,8 @@ function Cart() {
     </div>
   );
 
-  // Professional price formatting
-  const formatPrice = (price) => `$${Number(price).toFixed(2)}`;
+  // Professional price formatting - CORREGIDO: € en lugar de $
+  const formatPrice = (price) => `€${Number(price).toFixed(2)}`;
 
   if (!isAuthenticated()) {
     return (
@@ -255,7 +255,6 @@ function Cart() {
         subtitle={`${getTotalItems()} ${getTotalItems() === 1 ? 'item' : 'items'}`}
       >
         <Layout>
-          {/* Mobile Cart Items */}
           <Layout.Section>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {cartItems.map((item) => (
