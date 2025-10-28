@@ -111,7 +111,7 @@ def get_dashboard_metrics():
         total_revenue = db.session.query(func.sum(Order.total_amount))\
             .filter(Order.status != 'cancelled').scalar() or 0
         total_orders = Order.query.filter(Order.status != 'cancelled').count()
-        total_customers = User.query.filter(User.is_admin != True).count()
+        total_customers = User.query.filter((User.is_admin.is_(None)) | (User.is_admin == False)).count()
 
         today = datetime.now().date()
         today_revenue = db.session.query(func.sum(Order.total_amount))\
