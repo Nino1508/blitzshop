@@ -22,22 +22,22 @@ class Coupon(db.Model):
     usage_count = db.Column(db.Integer, nullable=False, default=0)
 
     # Validity period
-    valid_from = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    valid_from = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now())
     valid_until = db.Column(db.DateTime, nullable=True)          # ✅ puede ser NULL
 
     # Status
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     # Metadata
-    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now())
+    updated_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(), onupdate=lambda: datetime.now(timezone.utc))
 
     # Relationships
     usage_history = db.relationship('CouponUsage', backref='coupon', lazy='dynamic')
 
     def is_valid(self, cart_total=None, user_id=None):
         """Check if coupon is valid for use"""
-        now = datetime.now(timezone.utc)
+        now = datetime.now()
 
         if not self.is_active:
             return False, "Coupon is not active"

@@ -45,7 +45,6 @@ const AdminDashboard = () => {
     {
       id: 'analytics',
       content: 'Analytics',
-      badge: <Badge tone="info">Active</Badge>,
       accessibilityLabel: 'View analytics and reports',
       panelID: 'analytics-panel',
     },
@@ -70,7 +69,6 @@ const AdminDashboard = () => {
     {
       id: 'coupons',
       content: 'Coupons',
-      badge: <Badge tone="attention">New</Badge>,
       accessibilityLabel: 'Manage discount coupons',
       panelID: 'coupons-panel',
     },

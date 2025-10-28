@@ -22,9 +22,11 @@ import {
   Tabs,
   ChoiceList,
   DatePicker,
-  Popover
+  Popover,
+  Grid
 } from '@shopify/polaris';
-// ❌ Eliminado: import { format } from 'date-fns';
+import MetricCard from "../analytics/MetricCard";
+
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -45,19 +47,19 @@ function ManageCoupons() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successBanner, setSuccessBanner] = useState(null);
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchValue, setSearchValue] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  
+
   // Modal states
   const [modalActive, setModalActive] = useState(false);
   const [editingCoupon, setEditingCoupon] = useState(null);
   const [deleteModalActive, setDeleteModalActive] = useState(false);
   const [couponToDelete, setCouponToDelete] = useState(null);
-  
+
   // Form states
   const [formData, setFormData] = useState({
     code: '',
@@ -73,13 +75,13 @@ function ManageCoupons() {
     is_active: true
   });
   const [formErrors, setFormErrors] = useState({});
-  
+
   // Date picker states
   const [validFromPopover, setValidFromPopover] = useState(false);
   const [validUntilPopover, setValidUntilPopover] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  
+
   // Stats
   const [stats, setStats] = useState(null);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -96,7 +98,7 @@ function ManageCoupons() {
         search: searchValue,
         status: statusFilter
       });
-      
+
       const response = await fetch(`${API_URL}/api/coupons?${params}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -167,7 +169,7 @@ function ManageCoupons() {
 
     try {
       const token = localStorage.getItem('ecommerce-jwt-token');
-      const url = editingCoupon 
+      const url = editingCoupon
         ? `${API_URL}/api/coupons/${editingCoupon.id}`
         : `${API_URL}/api/coupons`;
       const method = editingCoupon ? 'PUT' : 'POST';
@@ -270,8 +272,8 @@ function ManageCoupons() {
   const rows = coupons.map(coupon => [
     <Text variant="bodyMd" fontWeight="bold">{coupon.code}</Text>,
     coupon.description || '-',
-    coupon.discount_type === 'percentage' 
-      ? `${coupon.discount_value}%` 
+    coupon.discount_type === 'percentage'
+      ? `${coupon.discount_value}%`
       : `€${coupon.discount_value}`,
     coupon.min_purchase != null ? `€${coupon.min_purchase}` : '-',
     `${coupon.usage_count || 0}${coupon.usage_limit ? `/${coupon.usage_limit}` : ''}`,
@@ -279,8 +281,8 @@ function ManageCoupons() {
     getStatusBadge(coupon),
     <InlineStack gap="2">
       <Button size="slim" onClick={() => openEditModal(coupon)}>Edit</Button>
-      <Button 
-        size="slim" 
+      <Button
+        size="slim"
         tone="critical"
         onClick={() => {
           setCouponToDelete(coupon);
@@ -314,7 +316,7 @@ function ManageCoupons() {
   }
 
   return (
-    <Page 
+    <Page
       title="Manage Coupons"
       primaryAction={{
         content: 'Create Coupon',
@@ -332,7 +334,7 @@ function ManageCoupons() {
             </Banner>
           </Layout.Section>
         )}
-        
+
         {error && (
           <Layout.Section>
             <Banner tone="critical" onDismiss={() => setError(null)}>
@@ -407,36 +409,34 @@ function ManageCoupons() {
                   </BlockStack>
                 </div>
               )}
-              
+
               {selectedTab === 1 && stats && (
                 <div style={{ padding: '16px' }}>
-                  <BlockStack gap="4">
-                    <InlineStack gap="4">
-                      <Card>
-                        <BlockStack gap="2">
-                          <Text variant="headingMd">Total Coupons</Text>
-                          <Text variant="heading2xl">{stats.total_coupons}</Text>
-                          <Text tone="subdued">{stats.active_coupons} active</Text>
-                        </BlockStack>
-                      </Card>
-                      
-                      <Card>
-                        <BlockStack gap="2">
-                          <Text variant="headingMd">Total Usage</Text>
-                          <Text variant="heading2xl">{stats.total_usage}</Text>
-                          <Text tone="subdued">Times used</Text>
-                        </BlockStack>
-                      </Card>
-                      
-                      <Card>
-                        <BlockStack gap="2">
-                          <Text variant="headingMd">Total Discount</Text>
-                          <Text variant="heading2xl">€{stats.total_discount_given.toFixed(2)}</Text>
-                          <Text tone="subdued">Given to customers</Text>
-                        </BlockStack>
-                      </Card>
-                    </InlineStack>
-                    
+                  <BlockStack gap="400">
+                    <Grid>
+                      <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4 }}>
+                        <MetricCard
+                          title="Total Coupons"
+                          value={stats.total_coupons}
+                          subtitle={`${stats.active_coupons} active`}
+                        />
+                      </Grid.Cell>
+                      <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4 }}>
+                        <MetricCard
+                          title="Total Usage"
+                          value={stats.total_usage}
+                          subtitle="Times used"
+                        />
+                      </Grid.Cell>
+                      <Grid.Cell columnSpan={{ xs: 6, sm: 6, md: 4, lg: 4 }}>
+                        <MetricCard
+                          title="Total Discount"
+                          value={`€${stats.total_discount_given.toFixed(2)}`}
+                          subtitle="Given to customers"
+                        />
+                      </Grid.Cell>
+                    </Grid>
+
                     {stats.most_used_coupons.length > 0 && (
                       <Card>
                         <BlockStack gap="3">
@@ -447,8 +447,8 @@ function ManageCoupons() {
                             rows={stats.most_used_coupons.map(c => [
                               c.code,
                               c.usage_count,
-                              c.discount_type === 'percentage' 
-                                ? `${c.discount_value}%` 
+                              c.discount_type === 'percentage'
+                                ? `${c.discount_value}%`
                                 : `€${c.discount_value}`
                             ])}
                           />
@@ -484,7 +484,7 @@ function ManageCoupons() {
               placeholder="e.g., SAVE20"
               maxLength={50}
             />
-            
+
             <TextField
               label="Description"
               value={formData.description}
@@ -492,7 +492,7 @@ function ManageCoupons() {
               placeholder="e.g., 20% off for new customers"
               maxLength={200}
             />
-            
+
             <FormLayout.Group>
               <Select
                 label="Discount Type"
@@ -503,7 +503,7 @@ function ManageCoupons() {
                 value={formData.discount_type}
                 onChange={(value) => setFormData({ ...formData, discount_type: value })}
               />
-              
+
               <TextField
                 label={formData.discount_type === 'percentage' ? 'Discount (%)' : 'Discount (€)'}
                 value={formData.discount_value}
@@ -515,7 +515,7 @@ function ManageCoupons() {
                 step="0.01"
               />
             </FormLayout.Group>
-            
+
             <FormLayout.Group>
               <TextField
                 label="Minimum Purchase (€)"
@@ -526,7 +526,7 @@ function ManageCoupons() {
                 step="0.01"
                 helpText="Leave empty for no minimum"
               />
-              
+
               {formData.discount_type === 'percentage' && (
                 <TextField
                   label="Maximum Discount (€)"
@@ -539,7 +539,7 @@ function ManageCoupons() {
                 />
               )}
             </FormLayout.Group>
-            
+
             <FormLayout.Group>
               <TextField
                 label="Total Usage Limit"
@@ -549,7 +549,7 @@ function ManageCoupons() {
                 min="0"
                 helpText="Leave empty for unlimited"
               />
-              
+
               <TextField
                 label="Per User Limit"
                 value={formData.usage_limit_per_user}
@@ -559,7 +559,7 @@ function ManageCoupons() {
                 helpText="Max uses per customer"
               />
             </FormLayout.Group>
-            
+
             <FormLayout.Group>
               <Popover
                 active={validFromPopover}
@@ -590,7 +590,7 @@ function ManageCoupons() {
                   />
                 </div>
               </Popover>
-              
+
               <Popover
                 active={validUntilPopover}
                 activator={
@@ -621,14 +621,14 @@ function ManageCoupons() {
                 </div>
               </Popover>
             </FormLayout.Group>
-            
+
             <Checkbox
               label="Active"
               checked={formData.is_active}
               onChange={(value) => setFormData({ ...formData, is_active: value })}
               helpText="Deactivate to temporarily disable the coupon"
             />
-            
+
             {formErrors.submit && <InlineError message={formErrors.submit} />}
           </FormLayout>
         </Modal.Section>
