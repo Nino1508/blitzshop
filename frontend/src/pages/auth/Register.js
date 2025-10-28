@@ -212,7 +212,8 @@ function Register() {
                             cursor: 'pointer', 
                             padding: '4px',
                             display: 'flex',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            background: 'transparent'
                           }}
                         >
                           <Icon source={showPassword ? HideIcon : ViewIcon} color="subdued" />
@@ -235,7 +236,8 @@ function Register() {
                             cursor: 'pointer', 
                             padding: '4px',
                             display: 'flex',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            background: 'transparent'
                           }}
                         >
                           <Icon source={showConfirmPassword ? HideIcon : ViewIcon} color="subdued" />

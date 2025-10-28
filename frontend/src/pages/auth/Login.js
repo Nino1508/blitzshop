@@ -171,7 +171,8 @@ function Login() {
                             cursor: 'pointer', 
                             padding: '4px',
                             display: 'flex',
-                            alignItems: 'center'
+                            alignItems: 'center',
+                            background: 'transparent'
                           }}
                         >
                           <Icon source={showPassword ? HideIcon : ViewIcon} color="subdued" />
