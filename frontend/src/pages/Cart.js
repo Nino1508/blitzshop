@@ -107,9 +107,6 @@ function Cart() {
 
     const orderData = await response.json();
     
-    // 2. Limpiar el carrito después de crear la orden exitosamente
-    await clearCart();
-    
     // 3. Navegar a checkout con el ID de la orden
     navigate(`/checkout?order_id=${orderData.order.id}`);
     

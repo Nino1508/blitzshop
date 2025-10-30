@@ -5,6 +5,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Page, Card, Button, Banner, Spinner, BlockStack, InlineStack, Text, Divider } from '@shopify/polaris';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import CouponInput from '../components/CouponInput';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -12,7 +13,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 // Your Stripe public key
 const stripePromise = loadStripe('pk_test_51RvJEnAqoyGnpREmRiEBoqyrP4n1Kc4gJb5bLn52EQVQNw1UZ36aw5nEbrKmB687SVHTtJSfZeWvFRKedxLBbx2h00PML3njPq');
 
-// Componente de formulario de pago
+// Payment form component
 const PaymentForm = ({ order, finalTotal, onPaymentSuccess }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -21,7 +22,7 @@ const PaymentForm = ({ order, finalTotal, onPaymentSuccess }) => {
   const [error, setError] = useState(null);
   const [clientSecret, setClientSecret] = useState(null);
 
-  // Crear Payment Intent al cargar
+  // Create Payment Intent on load
   useEffect(() => {
     if (order) {
       createPaymentIntent();
@@ -38,7 +39,7 @@ const PaymentForm = ({ order, finalTotal, onPaymentSuccess }) => {
         },
         body: JSON.stringify({
           order_id: order.id,
-          amount: finalTotal // Usar el total con descuento
+          amount: finalTotal // Use discounted total
         })
       });
 
@@ -65,7 +66,7 @@ const PaymentForm = ({ order, finalTotal, onPaymentSuccess }) => {
     setError(null);
 
     try {
-      // Confirmar pago con Stripe
+      // Confirm payment with Stripe
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
         clientSecret,
         {
@@ -81,7 +82,7 @@ const PaymentForm = ({ order, finalTotal, onPaymentSuccess }) => {
         return;
       }
 
-      // Confirmar pago en nuestro backend
+      // Confirm payment on backend
       const confirmResponse = await fetch(`${API_URL}/api/payments/confirm`, {
         method: 'POST',
         headers: {
@@ -160,17 +161,18 @@ const PaymentForm = ({ order, finalTotal, onPaymentSuccess }) => {
   );
 };
 
-// Componente principal de Checkout
+// Main Checkout component
 const Checkout = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { getAuthToken } = useAuth();
+  const { clearCart } = useCart();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   
-  // Estados para cupones
+  // Coupon states
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [finalTotal, setFinalTotal] = useState(0);
 
@@ -217,7 +219,7 @@ const Checkout = () => {
     }
   };
 
-  // Function to handle coupon application
+  // Handle coupon application
   const handleCouponApplied = async (coupon) => {
     try {
       // Apply coupon to existing order
@@ -241,11 +243,11 @@ const Checkout = () => {
 
       const data = await response.json();
       
-      // Actualizar la orden con el descuento
+      // Update order with discount
       setAppliedCoupon(coupon);
       setFinalTotal(data.final_total);
       
-      // Actualizar la orden en el estado
+      // Update order state
       const updatedOrder = {
         ...order,
         coupon_code: coupon.code,
@@ -254,7 +256,7 @@ const Checkout = () => {
       };
       setOrder(updatedOrder);
       
-      // Actualizar en el backend
+      // Update on backend
       await fetch(`${API_URL}/api/orders/${order.id}`, {
         method: 'PATCH',
         headers: {
@@ -278,7 +280,7 @@ const Checkout = () => {
     setAppliedCoupon(null);
     setFinalTotal(order.total_amount);
     
-    // Actualizar la orden para quitar el cupón
+    // Update order to remove coupon
     setOrder({
       ...order,
       coupon_code: null,
@@ -286,7 +288,7 @@ const Checkout = () => {
       final_amount: order.total_amount
     });
     
-    // Actualizar en el backend
+    // Update on backend
     fetch(`${API_URL}/api/orders/${order.id}`, {
       method: 'PATCH',
       headers: {
@@ -301,9 +303,12 @@ const Checkout = () => {
     });
   };
 
-  const handlePaymentSuccess = (updatedOrder) => {
+  const handlePaymentSuccess = async (updatedOrder) => {
     setOrder(updatedOrder);
     setPaymentSuccess(true);
+    
+    // Clear cart after successful payment
+    await clearCart();
   };
 
   if (loading) {
@@ -410,7 +415,7 @@ const Checkout = () => {
           </BlockStack>
         </Card>
 
-        {/* Componente de Cupón - Solo mostrar si no hay pago exitoso y la orden está pendiente */}
+        {/* Coupon component - Only show if no payment success and order is pending */}
         {order.status === 'pending' && !paymentSuccess && (
           <CouponInput 
             cartTotal={order.total_amount}
