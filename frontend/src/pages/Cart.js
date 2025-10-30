@@ -20,6 +20,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 function Cart() {
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const { 
     cartItems, 
     loading, 
@@ -70,51 +71,58 @@ function Cart() {
   };
 
   const handleCheckout = async () => {
+    if (checkoutLoading) return; // Prevent double click
+    
     console.log('CartItems at checkout:', cartItems);
     console.log('CartItems length:', cartItems.length);
     console.log('First item:', cartItems[0]);
     console.log('Product details:', cartItems[0].product);
+    
     try {
-    // Verificar que hay items en el carrito
-    if (!cartItems || cartItems.length === 0) {
-      alert('Your cart is empty');
-      return;
+      setCheckoutLoading(true);
+      
+      // Check if cart has items
+      if (!cartItems || cartItems.length === 0) {
+        alert('Your cart is empty');
+        return;
+      }
+
+      // 1. Create order from cart
+      const response = await fetch(`${API_URL}/api/orders/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('ecommerce-jwt-token')}`
+        },
+        body: JSON.stringify({
+          items: cartItems.map(item => ({
+            product_id: item.product_id, 
+            quantity: item.quantity,
+            unit_price: item.total_price / item.quantity 
+          })),
+          shipping_address: 'Default address',
+          billing_address: 'Default address',
+          total_amount: getTotalPrice()
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create order');
+      }
+
+      const orderData = await response.json();
+      
+      // 2. Navigate to checkout with order ID
+      navigate(`/checkout?order_id=${orderData.order.id}`);
+      
+    } catch (error) {
+      console.error('Checkout error:', error);
+      alert(`Error creating order: ${error.message}`);
+    } finally {
+      setCheckoutLoading(false);
     }
-
-    // 1. Crear orden desde el carrito
-    const response = await fetch(`${API_URL}/api/orders/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('ecommerce-jwt-token')}`
-      },
-      body: JSON.stringify({
-        items: cartItems.map(item => ({
-          product_id: item.product_id , 
-          quantity: item.quantity,
-          unit_price: item.total_price / item.quantity 
-        })),
-        shipping_address: 'Default address', // Por ahora básico
-        billing_address: 'Default address',
-        total_amount: getTotalPrice() // Usas getTotalPrice() no total
-      })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to create order');
-    }
-
-    const orderData = await response.json();
-    
-    // 3. Navegar a checkout con el ID de la orden
-    navigate(`/checkout?order_id=${orderData.order.id}`);
-    
-  } catch (error) {
-    console.error('Checkout error:', error);
-    alert(`Error creating order: ${error.message}`);
-  }
-};
+  };
 
   // Professional quantity controls component
   const QuantityControls = ({ item }) => (
@@ -181,7 +189,7 @@ function Cart() {
     </div>
   );
 
-  // Professional price formatting - CORREGIDO: € en lugar de $
+  // Professional price formatting
   const formatPrice = (price) => `€${Number(price).toFixed(2)}`;
 
   if (!isAuthenticated()) {
@@ -368,7 +376,7 @@ function Cart() {
                   gap: '8px', 
                   marginTop: '16px' 
                 }}>
-                  <Button primary fullWidth onClick={handleCheckout}>
+                  <Button primary fullWidth onClick={handleCheckout} loading={checkoutLoading}>
                     Proceed to Checkout
                   </Button>
                   <Button fullWidth onClick={handleContinueShopping}>
@@ -492,7 +500,7 @@ function Cart() {
               </BlockStack>
 
               <BlockStack gap="200">
-                <Button primary size="large" onClick={handleCheckout}>
+                <Button primary size="large" onClick={handleCheckout} loading={checkoutLoading}>
                   Proceed to Checkout
                 </Button>
                 <Button onClick={handleContinueShopping}>
