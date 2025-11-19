@@ -470,12 +470,13 @@ const ManageProducts = () => {
               />
               
               {pagination && pagination.pages > 1 && (
-                <div style={{ padding: '16px', textAlign: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0' }}>
                   <Pagination
                     hasPrevious={pagination?.has_prev || false}
                     onPrevious={() => setCurrentPage(currentPage - 1)}
                     hasNext={pagination?.has_next || false}
                     onNext={() => setCurrentPage(currentPage + 1)}
+                    label={`${currentPage} / ${pagination?.pages || 1}`}
                   />
                 </div>
               )}

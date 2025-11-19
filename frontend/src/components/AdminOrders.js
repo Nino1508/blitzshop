@@ -11,7 +11,8 @@ import {
   InlineStack,
   Text,
   Modal,
-  Spinner
+  Spinner,
+  Pagination
 } from '@shopify/polaris';
 import { useAuth } from '../context/AuthContext';
 
@@ -25,17 +26,22 @@ const AdminOrders = () => {
   const [showDetails, setShowDetails] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     fetchOrders();
-  }, [statusFilter]);
+  }, [statusFilter, currentPage]);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      let url = `${API_URL}/api/orders/admin/all`;
+      let url = `${API_URL}/api/orders/admin/all?page=${currentPage}&limit=${itemsPerPage}`;
       if (statusFilter !== 'all') {
-        url += `?status=${statusFilter}`;
+        url += `&status=${statusFilter}`;
       }
       
       const response = await fetch(url, {
@@ -44,6 +50,7 @@ const AdminOrders = () => {
       
       const data = await response.json();
       setOrders(data.items || []);
+      setTotalPages(data.total_pages || 1);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -161,9 +168,23 @@ const AdminOrders = () => {
             headings={['Order ID', 'Customer', 'Total', 'Status', 'Date', 'Actions']}
             rows={rows}
           />
+
+          {/* Pagination */}
+          {filteredOrders.length > 0 && totalPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0' }}>
+              <Pagination
+                hasPrevious={currentPage > 1}
+                onPrevious={() => setCurrentPage(currentPage - 1)}
+                hasNext={currentPage < totalPages}
+                onNext={() => setCurrentPage(currentPage + 1)}
+                label={`${currentPage} / ${totalPages}`}
+              />
+            </div>
+          )}
         </BlockStack>
       </Card>
 
+      {/* Order Details Modal */}
       {showDetails && selectedOrder && (
         <Modal
           open={showDetails}

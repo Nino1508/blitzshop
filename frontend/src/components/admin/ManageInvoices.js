@@ -17,7 +17,8 @@ import {
   EmptyState,
   Filters,
   ChoiceList,
-  Checkbox
+  Checkbox,
+  Pagination
 } from '@shopify/polaris';
 import {
   ReceiptIcon,
@@ -559,24 +560,14 @@ const ManageInvoices = () => {
                 rows={rows}
                 footerContent={
                   totalPages > 1 && (
-                    <div style={{ textAlign: 'center', padding: '1rem' }}>
-                      <InlineStack gap="2" align="center">
-                        <Button
-                          disabled={currentPage === 1}
-                          onClick={() => setCurrentPage(currentPage - 1)}
-                        >
-                          Previous
-                        </Button>
-                        <Text as="span">
-                          Page {currentPage} of {totalPages}
-                        </Text>
-                        <Button
-                          disabled={currentPage === totalPages}
-                          onClick={() => setCurrentPage(currentPage + 1)}
-                        >
-                          Next
-                        </Button>
-                      </InlineStack>
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: '16px 0' }}>
+                      <Pagination
+                        hasPrevious={currentPage > 1}
+                        onPrevious={() => setCurrentPage(currentPage - 1)}
+                        hasNext={currentPage < totalPages}
+                        onNext={() => setCurrentPage(currentPage + 1)}
+                        label={`${currentPage} / ${totalPages}`}
+                      />
                     </div>
                   )
                 }
